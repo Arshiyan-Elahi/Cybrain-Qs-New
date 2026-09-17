@@ -1,0 +1,70 @@
+.page {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 31px 45px 30px 47px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 56px;
+}
+
+.body {
+  margin-top: 29px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 29px;
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.progressLabel {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--c-placeholder);
+}
+
+.createProgress {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--c-brand);
+}
+
+/* The design draws these wider than the shared button padding produces. */
+.footer > button:first-child {
+  min-width: 168px;
+}
+
+.footerActions > button:last-child {
+  min-width: 166px;
+}
+
+.footer button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .page {
+    padding: 24px 24px 28px;
+  }
+
+  .footer {
+    flex-wrap: wrap;
+  }
+}

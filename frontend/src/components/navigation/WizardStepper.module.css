@@ -1,0 +1,130 @@
+.stepper {
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--c-border);
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.listConnected {
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.item {
+  flex: none;
+  min-width: 0;
+}
+
+.listConnected .item {
+  min-width: auto;
+}
+
+/* Short rule drawn between steps in the connected (onboarding) variant. */
+.connector {
+  flex: none;
+  width: 34px;
+  height: 1px;
+  background: var(--c-border-strong);
+}
+
+.listConnected .connector {
+  width: 12px;
+  margin-top: 18px;
+  align-self: flex-start;
+}
+
+/* "•••" standing in for the steps hidden by truncation. */
+.ellipsis {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.listConnected .ellipsis {
+  margin-top: 14px;
+  align-self: flex-start;
+}
+
+.ellipsis span {
+  width: 6.7px;
+  height: 6.7px;
+  border-radius: var(--r-pill);
+  background: var(--c-text);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--c-text);
+  white-space: nowrap;
+}
+
+.listConnected .step {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 88px;
+  white-space: normal;
+}
+
+.circle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 2px solid var(--c-text);
+  border-radius: var(--r-pill);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.label {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.listConnected .label {
+  width: 100%;
+  font-size: 12px;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.stepActive {
+  color: var(--c-brand);
+}
+
+.stepActive .circle {
+  background: var(--c-brand);
+  border-color: var(--c-brand);
+  color: var(--c-on-brand);
+}
+
+.step:hover .label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Narrower desktops: let the row scroll rather than break the layout. */
+@media (max-width: 1360px) {
+  .list:not(.listConnected) {
+    justify-content: flex-start;
+    gap: 28px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+}

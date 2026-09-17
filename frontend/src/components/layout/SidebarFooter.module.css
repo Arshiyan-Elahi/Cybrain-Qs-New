@@ -1,0 +1,31 @@
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--c-brand);
+  font-size: 16px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.item:hover {
+  color: var(--c-brand-hover);
+}
+
+/* Collapsed rail: centred glyphs, no labels. */
+.rail {
+  align-items: center;
+  gap: 22px;
+}
+
+.rail .item {
+  justify-content: center;
+  width: 40px;
+  height: 32px;
+}

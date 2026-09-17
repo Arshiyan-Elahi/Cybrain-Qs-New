@@ -1,0 +1,46 @@
+.rail {
+  width: var(--w-rail);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 8px 26px;
+  background: var(--c-surface-soft);
+  border-right: 1px solid var(--c-border);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 20.6px measured between item boxes in the design; 21px rounds cleanly. */
+  gap: 21px;
+  margin-top: 66px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 18px;
+  border-radius: var(--r-lg);
+  color: var(--c-brand);
+}
+
+.item:hover {
+  color: var(--c-brand-hover);
+}
+
+/* Active entry grows into a 40x36 filled tile, as in the design. */
+.itemActive,
+.itemActive:hover {
+  height: 36px;
+  background: var(--c-brand);
+  color: var(--c-on-brand);
+}
+
+.spacer {
+  flex: 1 1 auto;
+  min-height: 40px;
+}

@@ -1,0 +1,23 @@
+services:
+  db:
+    # pgvector image is Postgres plus the vector extension, which the retrieval
+    # phase will need. Using it now avoids a migration to a different image later.
+    image: pgvector/pgvector:pg16
+    container_name: cybrain-qs-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cybrain
+      POSTGRES_PASSWORD: cybrain_dev
+      POSTGRES_DB: cybrain_qs
+    ports:
+      - "5432:5432"
+    volumes:
+      - cybrain-qs-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cybrain -d cybrain_qs"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  cybrain-qs-pgdata:

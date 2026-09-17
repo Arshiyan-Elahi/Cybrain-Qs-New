@@ -1,0 +1,523 @@
+{
+  "language": {
+    "label": "Sprache"
+  },
+  "knowledgeTypes": {"terminology":"Terminologie", "document_structure":"Dokumentstruktur", "writing_style":"Schreibstil", "regulation":"Regularien", "role":"Rollen", "responsibility":"Verantwortlichkeiten", "workflow":"Workflows", "process":"Prozesse", "business_rule":"Geschäftsregeln", "form_or_record":"Records & Formulare", "relationship":"Beziehungen"},
+  "knowledgeStatuses": {"proposed":"Vorgeschlagen", "verified":"Bestätigt", "rejected":"Abgelehnt", "superseded":"Ersetzt"},
+  "knowledgeTiers": {"company":"Unternehmen", "industry":"Branche", "global":"Global"},
+  "nav": {
+    "companies": "Unternehmen",
+    "sopCreate": "SOP erstellen",
+    "workflows": "Workflows",
+    "knowledge": "Wissen",
+    "assistant": "Assistent",
+    "records": "Formulare & Records",
+    "alerts": "Meldungen",
+    "settings": "Einstellungen",
+    "help": "Helfen",
+    "logout": "Abmelden"
+  },
+  "companyProfiles": {
+    "title": "Unternehmensprofile",
+    "description": "Erstellen und verwalten Sie Company Profiles, die Grundlage für Ihr Company Knowledge Model.",
+    "createCompany": "Neue Firma anlegen",
+    "searchPlaceholder": "Firma suchen...",
+    "searchLabel": "Firma suchen",
+    "empty": "Keine Firma gefunden.",
+    "createdShort": "Erstellt",
+    "info": {
+      "title": "Was ist ein Company Profile?",
+      "body": "Ein Company Profile ist der Startpunkt für den Aufbau Ihres Company Knowledge Models. Es enthält alle relevanten Informationen über Ihr Unternehmen, Ihre Regularien, Dokumentenstandards, Begriffe und Prozesse. Die KI nutzt dieses Wissen, um SOPs zu verstehen, zu verbessern und neu zu erstellen passend zu Ihrem Unternehmen."
+    },
+    "noSelection": "Wählen Sie ein Unternehmen aus, um das Profil zu sehen.",
+    "sopCount": "SOPs: {{count}}"
+  },
+  "companyDetail": {
+    "industry": "Branche",
+    "location": "Standort",
+    "primaryLanguage": "Hauptsprache",
+    "regulations": "Regulatorische Anforderungen",
+    "createdAt": "Erstellt am",
+    "updatedAt": "Zuletzt aktualisiert",
+    "sopCount": {
+      "unit": "SOP's",
+      "documentCount_one": "{{count}} SOP",
+      "documentCount_other": "{{count}} SOPs",
+      "knowledgeCounts": "{{proposed}} Vorgeschlagen · {{confirmed}} Bestätigt · {{rejected}} Abgelehnt",
+      "filterType": "Nach Typ filtern",
+      "filterStatus": "Nach Status filtern",
+      "filterDocument": "Nach Dokument filtern",
+      "allTypes": "Alle Typen",
+      "allStatuses": "Alle Status",
+      "allDocuments": "Alle Dokumente",
+      "viewMode": "Wissensansicht",
+      "viewByType": "Nach Wissenstyp",
+      "viewBySop": "Nach SOP",
+      "showAll": "Alle anzeigen ({{count}})",
+      "searchTerminology": "Terminologie durchsuchen",
+      "noSearchMatches": "Keine Terminologie entspricht dieser Suche.",
+      "noFilterMatches": "Keine Knowledge Objects entsprechen den aktuellen Filtern.",
+      "sourcesCount_one": "Quellen ({{count}})",
+      "sourcesCount_other": "Quellen ({{count}})",
+      "extractedCount_one": "{{count}} extrahiertes Objekt",
+      "extractedCount_other": "{{count}} extrahierte Objekte",
+      "knowledgeSections": {
+        "terminology": "Terminologie",
+        "roles_responsibilities": "Rollen & Verantwortlichkeiten",
+        "workflows_processes": "Workflows / Prozesse",
+        "workflows": "Workflows",
+        "business_rules": "Geschäftsregeln",
+        "regulations": "Regularien",
+        "records_forms": "Records & Formulare",
+        "relationships": "Beziehungen",
+        "document_structure": "Dokumentstruktur",
+        "writing_style": "Schreibstil"
+      },
+      "description": "Anzahl der hochgeladenen SOPs, die für dieses Company Knowledge Model analysiert wurden.",
+      "showDocuments": "Dokumente anzeigen",
+      "uploadDocument": "Dokument hochladen",
+      "uploadDocuments": "Dokumente hochladen",
+      "uploading": "Wird hochgeladen…",
+      "uploadStatus": "Upload-Status",
+      "documents": "Hochgeladene Dokumente",
+      "knowledgeObjects": "Verfügbare Knowledge Objects",
+      "noKnowledgeObjects": "Für dieses Unternehmen wurden noch keine Knowledge Objects extrahiert.",
+      "extractKnowledge": "Wissen extrahieren",
+      "extracting": "Wird extrahiert…",
+      "cancelling": "Wird abgebrochen…",
+      "cancel": "Abbrechen",
+      "confirmKnowledge": "Bestätigen",
+      "editKnowledge": "Bearbeiten",
+      "rejectKnowledge": "Ablehnen",
+      "editPrompt": "Bezeichnung des Knowledge Objects bearbeiten",
+      "knowledgeStatus": "Status: {{value}}",
+      "provenance": "Quelle",
+      "preview": "Vorschau",
+      "previewSuccess": "Dokument erfolgreich extrahiert ✓",
+      "close": "Schließen",
+      "sections": "Abschnitte",
+      "embeddings": "Embeddings",
+      "documentStructure": "Dokumentstruktur",
+      "extractedContent": "Extrahierter Inhalt",
+      "administrativeContent": "Administrative / Freigabe-Inhalte",
+      "stage": {"uploading":"Hochladen", "extracting":"Dokument wird extrahiert", "structuring":"Strukturierung und Chunking", "embedding":"Embeddings werden erstellt", "finalizing":"Abschluss", "completed":"Abgeschlossen", "cancelled":"Abgebrochen", "cancelling":"Wird abgebrochen", "failed":"Fehlgeschlagen", "processed":"Abgeschlossen", "needs_ocr":"OCR erforderlich"},
+      "noChunks": "Keine strukturierten Abschnitte verfügbar.",
+      "tier": "Ebene: {{value}}",
+      "embeddingCount": "{{embedded}}/{{chunks}} eingebettet",
+      "delete": "Löschen",
+      "deleting": "Wird gelöscht…",
+      "deleteTitle": "Diese SOP dauerhaft löschen?",
+      "deleteWarning": "Extrahierte Chunks, Embeddings und zugehörige ungeprüfte oder vorgeschlagene Extraktionsdaten werden ebenfalls entfernt. Dies kann nicht rückgängig gemacht werden.",
+      "deletePermanently": "Dauerhaft löschen",
+      "deleteSuccess": "{{filename}} wurde gelöscht.",
+      "deleteBlockedTitle": "Löschen blockiert",
+      "deleteBlockedMessage": "Diese SOP wird von verifiziertem Unternehmenswissen referenziert und kann noch nicht gelöscht werden.",
+      "deleteBlockedCount_one": "{{count}} verifiziertes Knowledge Object hängt davon ab.",
+      "deleteBlockedCount_other": "{{count}} verifizierte Knowledge Objects hängen davon ab.",
+      "status": {
+        "uploaded": "Hochgeladen",
+        "uploading": "Wird hochgeladen…",
+        "processing": "In Bearbeitung",
+        "embedding": "Embeddings werden erstellt…",
+        "cancelling": "Wird abgebrochen…",
+        "cancelled": "Abgebrochen",
+        "processed": "Verarbeitet",
+        "completed": "Abgeschlossen",
+        "embedding": "Embedding",
+        "failed": "Fehlgeschlagen",
+        "needs_ocr": "OCR erforderlich"
+      },
+      "uploaded": "{{filename}} in {{chunks}} Abschnitte verarbeitet.",
+      "uploadRejected": "Upload abgelehnt. {{reason}}",
+      "needsOcr": "Keine Textebene gefunden. Dieses Dokument benötigt OCR."
+    }
+  },
+  "companyData": {
+    "industry": {
+      "pharma": "Pharma",
+      "medtech": "Medizintechnik",
+      "biotech": "Biotechnologie",
+      "cosmetics": "Kosmetik"
+    },
+    "location": {
+      "vienna-at": "Wien, Österreich",
+      "zurich-ch": "Zürich, Schweiz",
+      "munich-de": "München, Deutschland",
+      "graz-at": "Graz, Österreich",
+      "berlin-de": "Berlin, Deutschland"
+    },
+    "language": {
+      "de": "Deutsch",
+      "en": "Englisch"
+    },
+    "regulation": {
+      "eu-gmp": "EU GMP",
+      "fda": "FDA",
+      "ich-09": "ICH 09",
+      "ich-q10": "ICH Q10",
+      "annex-11": "Anhang 11",
+      "annex-1": "Anhang 1",
+      "iso-13485": "ISO 13485",
+      "mdr": "MDR",
+      "fda-21-cfr-820": "FDA 21 CFR 820",
+      "iso-22716": "ISO 22716"
+    }
+  },
+  "sop": {
+    "wizard": {
+      "back": "Zurück",
+      "stepperLabel": "SOP-Assistent Schritte",
+      "searchSimilar": "Search Similar Content",
+      "searchUnavailable": "Die Ähnlichkeitssuche ist nicht verfügbar, da die Backend-API noch nicht implementiert ist.",
+      "continueTo": "Weiter zur {{step}}",
+      "finish": "Abschließen",
+      "notDesigned": "Für diesen Schritt liegt noch kein Design vor. Der Schritt wird ergänzt, sobald das Layout verfügbar ist."
+    },
+    "steps": {
+      "project-initialization": "Projektinitialisierung",
+      "knowledge-selection": "Wissensauswahl",
+      "blueprint-builder": "Bauplan-Editor",
+      "knowledge-mapping": "Wissenskartierung",
+      "draft-generation": "Entwurfserstellung",
+      "review-iteration": "Überprüfung & Iteration"
+    },
+    "step01": {
+      "subtitle": "Beginnen Sie Ihr neues SOP-Projekt, indem Sie grundlegende Informationen bereitstellen.",
+      "titleField": {
+        "label": "Titel der SOP",
+        "hint": "Wie soll die SOP benannt werden?",
+        "placeholder": "Lieferantenqualifizierung"
+      },
+      "suggestionsLabel": "Vorschläge auf der Grundlage bestehender SOPs:",
+      "client": {
+        "label": "Kunde",
+        "hint": "Für welchen Kunden arbeiten Sie?"
+      },
+      "context": {
+        "label": "SOP-Kontext",
+        "hint": "Warum ist diese SOP erforderlich?"
+      },
+      "additionalContext": {
+        "label": "Zusätzlicher Kontext (optional)",
+        "aria": "Zusätzlicher Kontext",
+        "placeholder": "Das Audit hat ergeben, dass die aktuelle Lieferantenqualifizierung nicht den FDA-Anforderungen entspricht."
+      }
+    },
+    "contextOptions": {
+      "new-process": "Neuer Prozess",
+      "audit-finding": "Audit-Feststellung",
+      "new-customer": "Neuer Kunde",
+      "regulatory": "Regulatorische Anforderung",
+      "harmonisation": "Prozessharmonisierung",
+      "replaces-existing": "Ersetzt Vorhandenes SOPS",
+      "other": "Andere"
+    },
+    "suggestions": {
+      "supplier-management": "Lieferantenmanagement (vorhanden)",
+      "supplier-approval": "Lieferantenzulassung (vorhanden)",
+      "external-provider-qualification": "Qualifizierung externer Anbieter (neu)"
+    },
+    "ckm": {
+      "title": "CKM-Status für {{company}}",
+      "sopsAnalysed": "{{value}} SOPs analysiert",
+      "rolesIdentified": "{{value}} Rollen identifiziert",
+      "processesIdentified": "{{value}} Prozesse identifiziert",
+      "reliability": "Zuverlässigkeit: {{value}} %",
+      "lastUpdated": "Zuletzt aktualisiert: {{value}}",
+      "documentsAnalysed": "{{value}} Dokumente analysiert",
+      "chunksAvailable": "{{value}} Wissensabschnitte verfügbar",
+      "embeddingsAvailable": "{{value}} Abschnitte eingebettet",
+      "aiStatus": "Lokale KI: {{value}}",
+      "noCompany": "Kein Unternehmen ausgewählt",
+      "noData": "Keine Dokumentstatistiken verfügbar",
+      "relative": {
+        "today": "Heute",
+        "yesterday": "Gestern"
+      }
+    }
+  },
+  "onboarding": {
+    "back": "Zurück",
+    "previous": "zurück",
+    "next": "Nächste",
+    "skip": "Überspringen",
+    "finish": "Fertig",
+    "create": {
+      "submit": "Unternehmen anlegen",
+      "working": "Bitte warten…",
+      "creating": "Unternehmen wird angelegt…",
+      "uploading": "Upload {{current}} von {{total}}: {{filename}}",
+      "finalizing": "Unternehmensprofil wird geöffnet…",
+      "finalizingWithUploadErrors": "Unternehmen angelegt. Einige Uploads sind fehlgeschlagen — Profil wird geöffnet…"
+    },
+    "draft": {
+      "restored": "Deine unvollständigen Aufnahme-Antworten wurden wiederhergestellt.",
+      "restoredWithFiles": "Deine unvollständigen Antworten wurden wiederhergestellt. Bitte wähle Dokumente oder Templates erneut aus, bevor du das Unternehmen anlegst."
+    },
+    "stepperLabel": "Abschnitte der Kundenaufnahme",
+    "progress": "Schritt {{current}} von {{total}} · {{label}}",
+    "notDesigned": "Für diesen Abschnitt liegt noch kein Design vor. Der Abschnitt wird ergänzt, sobald das Layout verfügbar ist.",
+    "validation": {
+      "startRequired": "Wähle, wie die Aufnahme starten soll.",
+      "companyNameRequired": "Gib einen Unternehmensnamen ein, um fortzufahren.",
+      "industryRequired": "Wähle eine Branche aus, um fortzufahren.",
+      "locationRequired": "Wähle einen Standort aus, um fortzufahren.",
+      "unsupportedFiles": "Nur PDF- und DOCX-Dateien können hochgeladen werden. Nicht unterstützt: {{names}}"
+    },
+    "files": {
+      "listLabel": "Ausgewählte Dateien",
+      "addDocuments": "Dokumente auswählen",
+      "addTemplate": "Template auswählen",
+      "emptyDocuments": "Noch keine Dokumente ausgewählt. Sie werden nach dem Anlegen des Unternehmens hochgeladen.",
+      "emptyTemplate": "Noch kein Template ausgewählt. Es wird nach dem Anlegen des Unternehmens hochgeladen.",
+      "remove": "Entfernen"
+    },
+    "steps": {
+      "start": "Start",
+      "company": "Unternehmen",
+      "regulations": "Regularien",
+      "documentStructure": "Dokumentenstruktur",
+      "writingStyle": "Schreibstil",
+      "terminology": "Terminologie",
+      "organisation": "Organisation",
+      "processes": "Prozesse",
+      "templates": "Templates",
+      "formsRecords": "Formulare & Records",
+      "businessRules": "Geschäftsregeln",
+      "relationships": "Beziehungen",
+      "bestPractices": "Best Practices",
+      "aiPreferences": "KI-Einstellungen",
+      "summary": "Zusammenfassung"
+    },
+    "start": {
+      "title": "Abschnitt 0: START „Was hast du?“",
+      "subtitle": "Wähle aus, was bereits vorhanden ist. Dadurch kann unser System die beste Grundlage für dein CKM aufbauen.",
+      "question": "0.1 Was möchtest du mitbringen?",
+      "pathTitle": "Dokumentpfad",
+      "pathHint": "Lade vorhandenes Material jetzt hoch oder fahre ohne Dokumente fort.",
+      "uploadSopsTitle": "Bestehende SOPs hochladen",
+      "uploadSopsHint": "PDF oder DOCX. Die Auswahl wird nur in dieser Sitzung gespeichert.",
+      "uploadTemplateTitle": "Template hochladen",
+      "uploadTemplateHint": "Word-Vorlage mit Logo und Formatierung.",
+      "continueWithoutHelper": "Du kannst mit einer Standard-GMP-Grundlage fortfahren und Dokumente später hinzufügen.",
+      "paths": {
+        "upload-template": "Template hochladen",
+        "upload-sops": "Bestehende SOPs hochladen",
+        "continue-without": "Ohne Dokumente fortfahren"
+      },
+      "options": {
+        "template": {
+          "title": "Ich habe ein Template",
+          "description": "Word-Vorlage mit Logo und Formatierung"
+        },
+        "existing-sops": {
+          "title": "Ich habe bestehende SOPs",
+          "description": "Mindestens 3 Stück vorhanden"
+        },
+        "nothing": {
+          "title": "Ich habe nichts",
+          "description": "Wir starten mit einem Standard-GMP-Template"
+        }
+      }
+    },
+    "company": {
+      "title": "Unternehmensinformationen",
+      "subtitle": "Identifiziere das Unternehmen, zu dem dieses Company Knowledge Model gehört.",
+      "nameLabel": "Unternehmensname",
+      "nameHint": "Verwende den rechtlichen oder operativen Namen aus den SOPs.",
+      "namePlaceholder": "z. B. Cybrain Pharma GmbH",
+      "industryLabel": "Branche",
+      "industryHint": "Wird für Vorschläge zu Regularien und Terminologie genutzt.",
+      "locationLabel": "Standort",
+      "languageLabel": "Hauptsprache",
+      "selectPlaceholder": "Auswählen…"
+    },
+    "regulations": {
+      "title": "Regulatorisches Profil",
+      "subtitle": "Wähle die Rahmenwerke, die für das Qualitätsmanagement dieses Unternehmens gelten.",
+      "fieldTitle": "Anwendbare Regularien",
+      "fieldHint": "Du kannst dies später verfeinern. Überspringen ist möglich.",
+      "empty": "Noch keine Regularien ausgewählt."
+    },
+    "documentStructure": {
+      "title": "Dokumentenstruktur",
+      "subtitle": "Beschreibe, wie SOPs für dieses Unternehmen organisiert sein sollen.",
+      "preferenceTitle": "Strukturpräferenz",
+      "preferenceHint": "Starte mit einer Standardgliederung oder leite sie aus hochgeladenen Dokumenten ab.",
+      "preferences": {
+        "standard": "Standard-GMP-Gliederung",
+        "from-documents": "Aus hochgeladenen SOPs ableiten",
+        "custom": "Eigene Notizen"
+      },
+      "uploadTitle": "Unterstützende SOP-Dokumente",
+      "uploadHint": "Optionale Sitzungsauswahl — während der Aufnahme wird nicht extrahiert.",
+      "withoutDocuments": "Weiter ohne Dokumente. Eine Standardstruktur kann später verfeinert werden.",
+      "notesTitle": "Strukturnotizen",
+      "notesPlaceholder": "z. B. Zweck, Geltungsbereich, Verantwortlichkeiten, Verfahren, Aufzeichnungen…"
+    },
+    "writingStyle": {
+      "title": "Schreibstil",
+      "subtitle": "Lege Ton und Stimme fest, denen generierte SOP-Entwürfe folgen sollen.",
+      "toneTitle": "Ton",
+      "formalityTitle": "Formalität",
+      "personTitle": "Stimme",
+      "notesTitle": "Stilnotizen",
+      "notesPlaceholder": "Modalverben, bevorzugte Formulierungen oder Stilvorgaben…",
+      "tones": {
+        "neutral": "Neutral",
+        "directive": "Direktiv",
+        "explanatory": "Erklärend"
+      },
+      "formalities": {
+        "formal": "Formell",
+        "balanced": "Ausgewogen",
+        "accessible": "Zugänglich"
+      },
+      "persons": {
+        "third": "Dritte Person",
+        "imperative": "Imperativ",
+        "mixed": "Gemischt"
+      }
+    },
+    "terminology": {
+      "title": "Terminologie",
+      "subtitle": "Erfasse unternehmensspezifische Begriffe, die in SOPs konsistent bleiben sollen.",
+      "listTitle": "Unternehmensbegriffe",
+      "listHint": "Ein Begriff pro Zeile. Optionale Definitionen nach einem Doppelpunkt.",
+      "listPlaceholder": "OJT: On-the-job-Training\nQA: Qualitätssicherung",
+      "preferExisting": "Bestehende Unternehmensbegriffe gegenüber generischen Synonymen bevorzugen",
+      "empty": "Noch keine Terminologie erfasst. Du kannst überspringen und Begriffe später ergänzen."
+    },
+    "organisation": {
+      "title": "Organisation / Rollen & Verantwortlichkeiten",
+      "subtitle": "Beschreibe Abteilungen und Rollen, die SOP-Inhalte besitzen oder freigeben.",
+      "departmentsTitle": "Abteilungen",
+      "departmentsHint": "Eine Abteilung pro Zeile.",
+      "departmentsPlaceholder": "Qualitätssicherung\nProduktion\nPersonalwesen",
+      "rolesTitle": "Rollen & Verantwortlichkeiten",
+      "rolesHint": "Rolle — Verantwortlichkeit-Paare unterstützen später die Wissenszuordnung.",
+      "rolesPlaceholder": "QA Manager — gibt SOPs frei\nTrainer — führt OJT durch"
+    },
+    "processes": {
+      "title": "Prozesse / Workflows",
+      "subtitle": "Liste Kernprozesse und typische Arbeitsabläufe auf.",
+      "listTitle": "Kernprozesse",
+      "listHint": "Ein Prozess pro Zeile.",
+      "listPlaceholder": "Dokumentenlenkung\nAbweichungsbearbeitung\nSchulungsmanagement",
+      "workflowTitle": "Workflow-Notizen",
+      "workflowPlaceholder": "Übergaben, Gates oder Reihenfolgevorgaben…"
+    },
+    "templates": {
+      "title": "Templates / Layout / Formatierung",
+      "subtitle": "Lege fest, wie SOP-Layout und Formatierung aufgebaut werden sollen.",
+      "preferenceTitle": "Template-Quelle",
+      "preferences": {
+        "use-uploaded": "Hochgeladenes Template verwenden",
+        "company-standard": "Unternehmensstandard-Layout",
+        "gmp-default": "Cybrain-GMP-Standard"
+      },
+      "uploadTitle": "Template-Datei",
+      "uploadHint": "Die Word-Template-Auswahl bleibt nur in dieser Sitzung.",
+      "layoutTitle": "Layout- & Formatierungsnotizen",
+      "layoutPlaceholder": "Logo-Platzierung, Schriften, Kopfzeilen, Fußzeilenfelder…"
+    },
+    "formsRecords": {
+      "title": "Records / Formulare",
+      "subtitle": "Erfasse Formulare und Aufzeichnungen, auf die SOPs typischerweise verweisen.",
+      "listTitle": "Formulare & Records",
+      "listHint": "Ein Eintrag pro Zeile.",
+      "listPlaceholder": "Schulungsanwesenheitsliste\nChargenprotokoll\nAbweichungsbericht",
+      "empty": "Noch keine Formulare oder Records erfasst."
+    },
+    "businessRules": {
+      "title": "Geschäftsregeln / Wissen",
+      "subtitle": "Erfasse Regeln, die beim Erstellen von SOPs sichtbar bleiben müssen.",
+      "listTitle": "Geschäftsregeln",
+      "listHint": "Eine Regel pro Zeile.",
+      "listPlaceholder": "Kritische Änderungen erfordern QA-Freigabe\nSchulung muss vor selbstständiger Arbeit abgeschlossen sein"
+    },
+    "relationships": {
+      "title": "Beziehungen",
+      "subtitle": "Beschreibe, wie Dokumente, Rollen und Prozesse zusammenhängen.",
+      "listTitle": "Bekannte Beziehungen",
+      "listHint": "z. B. SOP → Formular, Rolle → Prozess.",
+      "listPlaceholder": "SOP-HR-001 → Schulungsanwesenheitsliste\nQA Manager → Dokumentenlenkung"
+    },
+    "bestPractices": {
+      "title": "Best Practices",
+      "subtitle": "Optionale Praktiken, die in künftigen Entwürfen sichtbar sein sollen.",
+      "listTitle": "Best Practices",
+      "listHint": "Eine Praxis pro Zeile.",
+      "listPlaceholder": "Verfahren schrittweise und nummeriert halten\nShall/Must für verpflichtende Handlungen bevorzugen"
+    },
+    "aiPreferences": {
+      "title": "KI-Einstellungen / Qualitätsprofil",
+      "subtitle": "Steuere, wie offensiv KI-Vorschläge sein sollen. Menschliche Prüfung bleibt erforderlich.",
+      "levelTitle": "Unterstützungsniveau",
+      "levelHint": "KI-Ausgaben bleiben vorgeschlagen, bis eine Person sie bestätigt.",
+      "levels": {
+        "conservative": "Konservativ — weniger Vorschläge",
+        "balanced": "Ausgewogen",
+        "proactive": "Proaktiv — mehr Entwurfsunterstützung"
+      },
+      "requireVerification": "Explizite menschliche Prüfung verlangen, bevor Wissen bestätigt wird",
+      "notesTitle": "Qualitätsnotizen",
+      "notesPlaceholder": "Prüferwartungen, Zitationsvorgaben oder Eskalationsregeln…"
+    },
+    "summary": {
+      "title": "Zusammenfassung & Überprüfung",
+      "subtitle": "Prüfe die Aufnahmeentscheidungen. Bearbeite jeden Abschnitt vor dem Abschluss.",
+      "edit": "Bearbeiten",
+      "notProvided": "Nicht angegeben",
+      "method": "Startmethode",
+      "documentPath": "Dokumentpfad",
+      "documents": "Ausgewählte Dokumente",
+      "templates": "Ausgewählte Templates",
+      "persistenceNote": "Mit „Unternehmen anlegen“ wird das Profil auf dem Server gespeichert und ausgewählte Dokumente anschließend hochgeladen."
+    },
+    "analysis": {
+      "title": "Zusammenfassung der KI-Analyse",
+      "overall": "Gesamtanalyse",
+      "completed": "{{value}} % abgeschlossen",
+      "confidence": "Konfidenzwert",
+      "metrics": {
+        "document-structure": "Dokumentstruktur",
+        "writing-style": "Erkennung des Schreibstils",
+        "terminology": "Terminologieerkennung",
+        "regulatory": "Regulatorische Erkennung",
+        "workflow-extraction": "Workflow-Extraktion",
+        "metadata-extraction": "Metadatenextraktion"
+      }
+    }
+  },
+  "placeholder": {
+    "description": "Für diesen Bereich liegt noch kein Design vor.",
+    "sopLibrary": "SOP-Bibliothek"
+  },
+  "common": {
+    "loading": "Wird geladen…",
+    "loadFailed": "Daten konnten nicht geladen werden. {{message}}",
+    "retry": "Erneut versuchen",
+    "requestFailed": "Anfrage fehlgeschlagen",
+    "enabled": "aktiviert",
+    "disabled": "deaktiviert"
+  },
+  "auth": {
+    "signInTitle": "Anmelden",
+    "signInSubtitle": "Zugriff auf Ihre Unternehmensprofile und Knowledge Models.",
+    "signUpTitle": "Konto erstellen",
+    "signUpSubtitle": "Zugang zu Cybrain QS einrichten.",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "passwordHint": "Mindestens 8 Zeichen.",
+    "fullName": "Vollständiger Name",
+    "signInAction": "Anmelden",
+    "signUpAction": "Konto erstellen",
+    "working": "Bitte warten…",
+    "needAccount": "Noch kein Konto? Jetzt erstellen",
+    "haveAccount": "Bereits ein Konto? Anmelden",
+    "errors": {
+      "unreachable": "Server nicht erreichbar. Läuft das Backend?"
+    }
+  }
+}

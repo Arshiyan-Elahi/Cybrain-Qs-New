@@ -1,0 +1,120 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 42px 34px 30px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+/* ---- Header ---- */
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin-top: 2px;
+  border-radius: var(--r-2xl);
+  background: var(--c-brand-tile);
+  color: var(--c-brand);
+  --icon-cutout: var(--c-brand-tile);
+}
+
+.headerText {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.name {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.metaRow {
+  display: flex;
+  align-items: flex-start;
+  margin: 20px 0 0;
+}
+
+.metaField {
+  flex: none;
+  min-width: 0;
+}
+
+.metaDivider {
+  flex: none;
+  width: 1px;
+  height: 38px;
+  margin-right: 32px;
+  background: var(--c-border-strong);
+}
+
+.metaLabel {
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--c-text);
+}
+
+.metaValue {
+  margin: 9px 0 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--c-text);
+  white-space: nowrap;
+}
+
+/* ---- Sections ---- */
+/* Section rules carry the spacing on both sides, so every block between two
+   rules sits exactly where the design puts it. */
+.rule {
+  height: 1px;
+  margin: 32px 0 33px;
+  border: none;
+  background: var(--c-border-strong);
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 29px 0 0;
+}
+
+.dates {
+  display: flex;
+  margin: 0;
+}
+
+.dates > div:first-child {
+  width: 242px;
+  flex: none;
+}
+
+.dateLabel {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dateValue {
+  margin: 9px 0 0;
+  font-size: 15px;
+  line-height: 1.2;
+}

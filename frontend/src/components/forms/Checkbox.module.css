@@ -1,0 +1,37 @@
+.option {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.box {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.6px solid var(--c-control-border);
+  border-radius: 4px;
+  background: var(--c-surface);
+  color: var(--c-on-brand);
+}
+
+.boxChecked {
+  background: var(--c-brand);
+  border-color: var(--c-brand);
+}
+
+.option:focus-within .box {
+  outline: 2px solid var(--c-brand);
+  outline-offset: 2px;
+}
+
+.label {
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--c-text);
+  white-space: nowrap;
+}

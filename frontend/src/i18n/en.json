@@ -1,0 +1,523 @@
+{
+  "language": {
+    "label": "Language"
+  },
+  "knowledgeTypes": {"terminology":"Terminology", "document_structure":"Document Structure", "writing_style":"Writing Style", "regulation":"Regulations", "role":"Roles", "responsibility":"Responsibilities", "workflow":"Workflows", "process":"Processes", "business_rule":"Business Rules", "form_or_record":"Records & Forms", "relationship":"Relationships"},
+  "knowledgeStatuses": {"proposed":"Proposed", "verified":"Confirmed", "rejected":"Rejected", "superseded":"Superseded"},
+  "knowledgeTiers": {"company":"Company", "industry":"Industry", "global":"Global"},
+  "nav": {
+    "companies": "Companies",
+    "sopCreate": "Create SOP",
+    "workflows": "Workflows",
+    "knowledge": "Knowledge",
+    "assistant": "Assistant",
+    "records": "Forms & Records",
+    "alerts": "Alerts",
+    "settings": "Settings",
+    "help": "Help",
+    "logout": "Log out"
+  },
+  "companyProfiles": {
+    "title": "Company Profiles",
+    "description": "Create and manage Company Profiles, the foundation for your Company Knowledge Model.",
+    "createCompany": "Create new company",
+    "searchPlaceholder": "Search company...",
+    "searchLabel": "Search company",
+    "empty": "No company found.",
+    "createdShort": "Created",
+    "info": {
+      "title": "What is a Company Profile?",
+      "body": "A Company Profile is the starting point for building your Company Knowledge Model. It contains all relevant information about your company, your regulations, document standards, terminology and processes. The AI uses this knowledge to understand, improve and create SOPs that fit your company."
+    },
+    "noSelection": "Select a company to see its profile.",
+    "sopCount": "SOPs: {{count}}"
+  },
+  "companyDetail": {
+    "industry": "Industry",
+    "location": "Location",
+    "primaryLanguage": "Primary language",
+    "regulations": "Regulatory requirements",
+    "createdAt": "Created on",
+    "updatedAt": "Last updated",
+    "sopCount": {
+      "unit": "SOP's",
+      "documentCount_one": "{{count}} SOP",
+      "documentCount_other": "{{count}} SOPs",
+      "knowledgeCounts": "{{proposed}} Proposed · {{confirmed}} Confirmed · {{rejected}} Rejected",
+      "filterType": "Filter by type",
+      "filterStatus": "Filter by status",
+      "filterDocument": "Filter by document",
+      "allTypes": "All types",
+      "allStatuses": "All statuses",
+      "allDocuments": "All documents",
+      "viewMode": "Knowledge view",
+      "viewByType": "By Knowledge Type",
+      "viewBySop": "By SOP",
+      "showAll": "Show all ({{count}})",
+      "searchTerminology": "Search terminology",
+      "noSearchMatches": "No terminology matches this search.",
+      "noFilterMatches": "No Knowledge Objects match the current filters.",
+      "sourcesCount_one": "Sources ({{count}})",
+      "sourcesCount_other": "Sources ({{count}})",
+      "extractedCount_one": "{{count}} extracted object",
+      "extractedCount_other": "{{count}} extracted objects",
+      "knowledgeSections": {
+        "terminology": "Terminology",
+        "roles_responsibilities": "Roles & Responsibilities",
+        "workflows_processes": "Workflows / Processes",
+        "workflows": "Workflows",
+        "business_rules": "Business Rules",
+        "regulations": "Regulations",
+        "records_forms": "Records & Forms",
+        "relationships": "Relationships",
+        "document_structure": "Document Structure",
+        "writing_style": "Writing Style"
+      },
+      "description": "Number of uploaded SOPs analysed for this Company Knowledge Model.",
+      "showDocuments": "Show documents",
+      "uploadDocument": "Upload document",
+      "uploadDocuments": "Upload documents",
+      "uploading": "Uploading…",
+      "uploadStatus": "Upload status",
+      "documents": "Uploaded documents",
+      "knowledgeObjects": "Available knowledge objects",
+      "noKnowledgeObjects": "No Knowledge Objects have been extracted for this company.",
+      "extractKnowledge": "Extract knowledge",
+      "extracting": "Extracting…",
+      "cancelling": "Cancelling…",
+      "cancel": "Cancel",
+      "confirmKnowledge": "Confirm",
+      "editKnowledge": "Edit",
+      "rejectKnowledge": "Reject",
+      "editPrompt": "Edit the Knowledge Object label",
+      "knowledgeStatus": "Status: {{value}}",
+      "provenance": "Source",
+      "preview": "Preview",
+      "previewSuccess": "Document extracted successfully ✓",
+      "close": "Close",
+      "sections": "sections",
+      "embeddings": "embeddings",
+      "documentStructure": "Document structure",
+      "extractedContent": "Extracted content",
+      "administrativeContent": "Administrative / approval content",
+      "stage": {"uploading":"Uploading", "extracting":"Extracting document", "structuring":"Structuring and chunking", "embedding":"Creating embeddings", "finalizing":"Finalizing", "completed":"Completed", "cancelled":"Cancelled", "cancelling":"Cancelling", "failed":"Failed", "processed":"Completed", "needs_ocr":"Needs OCR"},
+      "noChunks": "No structured sections are available.",
+      "tier": "Tier: {{value}}",
+      "embeddingCount": "{{embedded}}/{{chunks}} embedded",
+      "delete": "Delete",
+      "deleting": "Deleting…",
+      "deleteTitle": "Delete this SOP permanently?",
+      "deleteWarning": "Extracted chunks, embeddings, and related unverified or proposed extraction data will also be removed. This cannot be undone.",
+      "deletePermanently": "Delete permanently",
+      "deleteSuccess": "{{filename}} was deleted.",
+      "deleteBlockedTitle": "Deletion blocked",
+      "deleteBlockedMessage": "This SOP is referenced by verified company knowledge and cannot be deleted yet.",
+      "deleteBlockedCount_one": "{{count}} verified Knowledge Object depends on it.",
+      "deleteBlockedCount_other": "{{count}} verified Knowledge Objects depend on it.",
+      "status": {
+        "uploaded": "Uploaded",
+        "uploading": "Uploading…",
+        "processing": "Processing",
+        "embedding": "Creating embeddings…",
+        "cancelling": "Cancelling…",
+        "cancelled": "Cancelled",
+        "processed": "Processed",
+        "completed": "Completed",
+        "embedding": "Embedding",
+        "failed": "Failed",
+        "needs_ocr": "Needs OCR"
+      },
+      "uploaded": "{{filename}} processed into {{chunks}} sections.",
+      "uploadRejected": "Upload rejected. {{reason}}",
+      "needsOcr": "No text layer found. This document needs OCR."
+    }
+  },
+  "companyData": {
+    "industry": {
+      "pharma": "Pharma",
+      "medtech": "Medical technology",
+      "biotech": "Biotechnology",
+      "cosmetics": "Cosmetics"
+    },
+    "location": {
+      "vienna-at": "Vienna, Austria",
+      "zurich-ch": "Zurich, Switzerland",
+      "munich-de": "Munich, Germany",
+      "graz-at": "Graz, Austria",
+      "berlin-de": "Berlin, Germany"
+    },
+    "language": {
+      "de": "German",
+      "en": "English"
+    },
+    "regulation": {
+      "eu-gmp": "EU GMP",
+      "fda": "FDA",
+      "ich-09": "ICH 09",
+      "ich-q10": "ICH Q10",
+      "annex-11": "Annex 11",
+      "annex-1": "Annex 1",
+      "iso-13485": "ISO 13485",
+      "mdr": "MDR",
+      "fda-21-cfr-820": "FDA 21 CFR 820",
+      "iso-22716": "ISO 22716"
+    }
+  },
+  "sop": {
+    "wizard": {
+      "back": "Back",
+      "stepperLabel": "SOP assistant steps",
+      "searchSimilar": "Search Similar Content",
+      "searchUnavailable": "Similarity search is not available because the backend API is not implemented.",
+      "continueTo": "Continue to {{step}}",
+      "finish": "Finish",
+      "notDesigned": "No design is available for this step yet. It will be added as soon as the layout is available."
+    },
+    "steps": {
+      "project-initialization": "Project initialization",
+      "knowledge-selection": "Knowledge selection",
+      "blueprint-builder": "Blueprint builder",
+      "knowledge-mapping": "Knowledge mapping",
+      "draft-generation": "Draft generation",
+      "review-iteration": "Review & iteration"
+    },
+    "step01": {
+      "subtitle": "Start your new SOP project by providing basic information.",
+      "titleField": {
+        "label": "SOP title",
+        "hint": "What should the SOP be called?",
+        "placeholder": "Supplier qualification"
+      },
+      "suggestionsLabel": "Suggestions based on existing SOPs:",
+      "client": {
+        "label": "Client",
+        "hint": "Which client are you working for?"
+      },
+      "context": {
+        "label": "SOP context",
+        "hint": "Why is this SOP required?"
+      },
+      "additionalContext": {
+        "label": "Additional context (optional)",
+        "aria": "Additional context",
+        "placeholder": "The audit found that the current supplier qualification does not meet FDA requirements."
+      }
+    },
+    "contextOptions": {
+      "new-process": "New process",
+      "audit-finding": "Audit finding",
+      "new-customer": "New customer",
+      "regulatory": "Regulatory requirement",
+      "harmonisation": "Process harmonisation",
+      "replaces-existing": "Replaces existing SOPS",
+      "other": "Other"
+    },
+    "suggestions": {
+      "supplier-management": "Supplier management (existing)",
+      "supplier-approval": "Supplier approval (existing)",
+      "external-provider-qualification": "Qualification of external providers (new)"
+    },
+    "ckm": {
+      "title": "CKM status for {{company}}",
+      "sopsAnalysed": "{{value}} SOPs analysed",
+      "rolesIdentified": "{{value}} roles identified",
+      "processesIdentified": "{{value}} processes identified",
+      "reliability": "Reliability: {{value}} %",
+      "lastUpdated": "Last updated: {{value}}",
+      "documentsAnalysed": "{{value}} documents analysed",
+      "chunksAvailable": "{{value}} knowledge sections available",
+      "embeddingsAvailable": "{{value}} sections embedded",
+      "aiStatus": "Local AI: {{value}}",
+      "noCompany": "No company selected",
+      "noData": "No document statistics available",
+      "relative": {
+        "today": "Today",
+        "yesterday": "Yesterday"
+      }
+    }
+  },
+  "onboarding": {
+    "back": "Back",
+    "previous": "back",
+    "next": "Next",
+    "skip": "Skip",
+    "finish": "Done",
+    "create": {
+      "submit": "Create company",
+      "working": "Please wait…",
+      "creating": "Creating company…",
+      "uploading": "Uploading {{current}} of {{total}}: {{filename}}",
+      "finalizing": "Opening company profile…",
+      "finalizingWithUploadErrors": "Company created. Some uploads failed — opening profile…"
+    },
+    "draft": {
+      "restored": "Your unfinished onboarding answers were restored.",
+      "restoredWithFiles": "Your unfinished answers were restored. Please re-select any documents or templates before creating the company."
+    },
+    "stepperLabel": "Client onboarding sections",
+    "progress": "Step {{current}} of {{total}} · {{label}}",
+    "notDesigned": "No design is available for this section yet. It will be added as soon as the layout is available.",
+    "validation": {
+      "startRequired": "Choose how you want to start onboarding.",
+      "companyNameRequired": "Enter a company name to continue.",
+      "industryRequired": "Select an industry to continue.",
+      "locationRequired": "Select a location to continue.",
+      "unsupportedFiles": "Only PDF and DOCX files can be uploaded. Unsupported: {{names}}"
+    },
+    "files": {
+      "listLabel": "Selected files",
+      "addDocuments": "Choose documents",
+      "addTemplate": "Choose template",
+      "emptyDocuments": "No documents selected yet. They will upload after the company is created.",
+      "emptyTemplate": "No template selected yet. It will upload after the company is created.",
+      "remove": "Remove"
+    },
+    "steps": {
+      "start": "Start",
+      "company": "Company",
+      "regulations": "Regulations",
+      "documentStructure": "Document structure",
+      "writingStyle": "Writing style",
+      "terminology": "Terminology",
+      "organisation": "Organisation",
+      "processes": "Processes",
+      "templates": "Templates",
+      "formsRecords": "Forms & Records",
+      "businessRules": "Business rules",
+      "relationships": "Relationships",
+      "bestPractices": "Best practices",
+      "aiPreferences": "AI preferences",
+      "summary": "Summary"
+    },
+    "start": {
+      "title": "Section 0: START “What do you have?”",
+      "subtitle": "Choose what already exists. This lets our system build the best possible foundation for your CKM.",
+      "question": "0.1 What would you like to bring?",
+      "pathTitle": "Document path",
+      "pathHint": "Upload existing material now, or continue without documents.",
+      "uploadSopsTitle": "Upload existing SOPs",
+      "uploadSopsHint": "PDF or DOCX. Selection is stored in this session only.",
+      "uploadTemplateTitle": "Upload template",
+      "uploadTemplateHint": "Word template with logo and formatting.",
+      "continueWithoutHelper": "You can continue with a standard GMP foundation and add documents later.",
+      "paths": {
+        "upload-template": "Upload a template",
+        "upload-sops": "Upload existing SOPs",
+        "continue-without": "Continue without documents"
+      },
+      "options": {
+        "template": {
+          "title": "I have a template",
+          "description": "Word template with logo and formatting"
+        },
+        "existing-sops": {
+          "title": "I have existing SOPs",
+          "description": "At least 3 available"
+        },
+        "nothing": {
+          "title": "I have nothing",
+          "description": "We start with a standard GMP template"
+        }
+      }
+    },
+    "company": {
+      "title": "Company information",
+      "subtitle": "Identify the company this Company Knowledge Model belongs to.",
+      "nameLabel": "Company name",
+      "nameHint": "Use the legal or operating name shown on SOPs.",
+      "namePlaceholder": "e.g. Cybrain Pharma GmbH",
+      "industryLabel": "Industry",
+      "industryHint": "Used to suggest regulations and terminology.",
+      "locationLabel": "Location",
+      "languageLabel": "Primary language",
+      "selectPlaceholder": "Select…"
+    },
+    "regulations": {
+      "title": "Regulatory profile",
+      "subtitle": "Select the frameworks that apply to this company’s quality system.",
+      "fieldTitle": "Applicable regulations",
+      "fieldHint": "You can refine this later. Skip if unsure.",
+      "empty": "No regulations selected yet."
+    },
+    "documentStructure": {
+      "title": "Document structure",
+      "subtitle": "Describe how SOPs should be organised for this company.",
+      "preferenceTitle": "Structure preference",
+      "preferenceHint": "Choose whether to start from a standard outline or uploaded documents.",
+      "preferences": {
+        "standard": "Standard GMP outline",
+        "from-documents": "Derive from uploaded SOPs",
+        "custom": "Custom notes"
+      },
+      "uploadTitle": "Supporting SOP documents",
+      "uploadHint": "Optional session selection — extraction is not run during onboarding.",
+      "withoutDocuments": "Continuing without documents. A standard structure can be refined later.",
+      "notesTitle": "Structure notes",
+      "notesPlaceholder": "e.g. Purpose, Scope, Responsibilities, Procedure, Records…"
+    },
+    "writingStyle": {
+      "title": "Writing style",
+      "subtitle": "Set the tone and voice that generated SOP drafts should follow.",
+      "toneTitle": "Tone",
+      "formalityTitle": "Formality",
+      "personTitle": "Voice",
+      "notesTitle": "Style notes",
+      "notesPlaceholder": "Modal verbs, preferred phrasing, or style constraints…",
+      "tones": {
+        "neutral": "Neutral",
+        "directive": "Directive",
+        "explanatory": "Explanatory"
+      },
+      "formalities": {
+        "formal": "Formal",
+        "balanced": "Balanced",
+        "accessible": "Accessible"
+      },
+      "persons": {
+        "third": "Third person",
+        "imperative": "Imperative",
+        "mixed": "Mixed"
+      }
+    },
+    "terminology": {
+      "title": "Terminology",
+      "subtitle": "Capture company-specific terms that should stay consistent in SOPs.",
+      "listTitle": "Company terms",
+      "listHint": "One term per line. Optional definitions after a colon.",
+      "listPlaceholder": "OJT: On-the-job training\nQA: Quality Assurance",
+      "preferExisting": "Prefer existing company terms over generic synonyms",
+      "empty": "No terminology entered yet. You can skip and add terms later."
+    },
+    "organisation": {
+      "title": "Organisation / roles & responsibilities",
+      "subtitle": "Describe departments and roles that own or approve SOP content.",
+      "departmentsTitle": "Departments",
+      "departmentsHint": "One department per line.",
+      "departmentsPlaceholder": "Quality Assurance\nProduction\nHuman Resources",
+      "rolesTitle": "Roles & responsibilities",
+      "rolesHint": "Role — responsibility pairs help later knowledge mapping.",
+      "rolesPlaceholder": "QA Manager — approves SOPs\nTrainer — delivers OJT"
+    },
+    "processes": {
+      "title": "Processes / workflows",
+      "subtitle": "List core processes and how work typically flows.",
+      "listTitle": "Core processes",
+      "listHint": "One process per line.",
+      "listPlaceholder": "Document control\nDeviation handling\nTraining management",
+      "workflowTitle": "Workflow notes",
+      "workflowPlaceholder": "Handoffs, gates, or sequencing constraints…"
+    },
+    "templates": {
+      "title": "Templates / layout / formatting",
+      "subtitle": "Choose how SOP layout and formatting should be established.",
+      "preferenceTitle": "Template source",
+      "preferences": {
+        "use-uploaded": "Use uploaded template",
+        "company-standard": "Company standard layout",
+        "gmp-default": "Cybrain GMP default"
+      },
+      "uploadTitle": "Template file",
+      "uploadHint": "Word template selection stays in this session only.",
+      "layoutTitle": "Layout & formatting notes",
+      "layoutPlaceholder": "Logo placement, fonts, headers, footer fields…"
+    },
+    "formsRecords": {
+      "title": "Records / forms",
+      "subtitle": "Capture forms and records that SOPs typically reference.",
+      "listTitle": "Forms & records",
+      "listHint": "One item per line.",
+      "listPlaceholder": "Training attendance form\nBatch record\nDeviation report",
+      "empty": "No forms or records listed yet."
+    },
+    "businessRules": {
+      "title": "Business rules / knowledge",
+      "subtitle": "Record rules that must remain visible when drafting SOPs.",
+      "listTitle": "Business rules",
+      "listHint": "One rule per line.",
+      "listPlaceholder": "Critical changes require QA approval\nTraining must be completed before independent work"
+    },
+    "relationships": {
+      "title": "Relationships",
+      "subtitle": "Describe how documents, roles, and processes relate.",
+      "listTitle": "Known relationships",
+      "listHint": "e.g. SOP → form, role → process.",
+      "listPlaceholder": "SOP-HR-001 → Training attendance form\nQA Manager → Document control"
+    },
+    "bestPractices": {
+      "title": "Best practices",
+      "subtitle": "Optional practices the company wants reflected in future drafts.",
+      "listTitle": "Best practices",
+      "listHint": "One practice per line.",
+      "listPlaceholder": "Keep procedures stepwise and numbered\nPrefer shall/must for mandatory actions"
+    },
+    "aiPreferences": {
+      "title": "AI preferences / quality profile",
+      "subtitle": "Control how assertive AI suggestions should be. Human verification stays required.",
+      "levelTitle": "Assist level",
+      "levelHint": "AI output remains proposed until a person confirms it.",
+      "levels": {
+        "conservative": "Conservative — fewer suggestions",
+        "balanced": "Balanced",
+        "proactive": "Proactive — more draft support"
+      },
+      "requireVerification": "Require explicit human verification before knowledge is confirmed",
+      "notesTitle": "Quality notes",
+      "notesPlaceholder": "Review expectations, citation preferences, or escalation rules…"
+    },
+    "summary": {
+      "title": "Summary & review",
+      "subtitle": "Review the onboarding choices. Edit any section before finishing.",
+      "edit": "Edit",
+      "notProvided": "Not provided",
+      "method": "Start method",
+      "documentPath": "Document path",
+      "documents": "Selected documents",
+      "templates": "Selected templates",
+      "persistenceNote": "Create company saves the profile to the server, then uploads any selected documents."
+    },
+    "analysis": {
+      "title": "Summary of the AI analysis",
+      "overall": "Overall analysis",
+      "completed": "{{value}} % complete",
+      "confidence": "Confidence score",
+      "metrics": {
+        "document-structure": "Document structure",
+        "writing-style": "Writing style detection",
+        "terminology": "Terminology detection",
+        "regulatory": "Regulatory detection",
+        "workflow-extraction": "Workflow extraction",
+        "metadata-extraction": "Metadata extraction"
+      }
+    }
+  },
+  "placeholder": {
+    "description": "No design is available for this area yet.",
+    "sopLibrary": "SOP Library"
+  },
+  "common": {
+    "loading": "Loading…",
+    "loadFailed": "Could not load data. {{message}}",
+    "retry": "Retry",
+    "requestFailed": "Request failed",
+    "enabled": "enabled",
+    "disabled": "disabled"
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signInSubtitle": "Access your company profiles and knowledge models.",
+    "signUpTitle": "Create an account",
+    "signUpSubtitle": "Set up access to Cybrain QS.",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "fullName": "Full name",
+    "signInAction": "Sign in",
+    "signUpAction": "Create account",
+    "working": "Please wait…",
+    "needAccount": "No account yet? Create one",
+    "haveAccount": "Already have an account? Sign in",
+    "errors": {
+      "unreachable": "Cannot reach the server. Is the backend running?"
+    }
+  }
+}

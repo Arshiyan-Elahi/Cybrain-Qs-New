@@ -1,0 +1,22 @@
+.track {
+  width: 100%;
+  overflow: hidden;
+  background: var(--c-track);
+}
+
+.fill {
+  height: 100%;
+  background: var(--c-brand);
+  border-radius: inherit;
+  transition: width 200ms ease;
+}
+
+.lg {
+  height: 11px;
+  border-radius: 5.5px;
+}
+
+.sm {
+  height: 5px;
+  border-radius: 2.5px;
+}

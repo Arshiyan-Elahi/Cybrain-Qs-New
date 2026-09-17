@@ -1,0 +1,159 @@
+.panel {
+  padding: 33px 34px 36px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+.header {
+  max-width: 720px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin-top: 10px;
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--c-text);
+}
+
+.error {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--c-error);
+  border-radius: var(--r-lg);
+  color: var(--c-error);
+  font-size: 13px;
+}
+
+.body {
+  margin-top: 28px;
+  display: grid;
+  gap: 18px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.chipGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.select {
+  width: 100%;
+  min-height: 41px;
+  padding: 8px 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  background: var(--c-surface);
+  color: var(--c-text);
+  font: inherit;
+}
+
+.helper {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--c-placeholder);
+}
+
+.empty {
+  padding: 18px;
+  border: 1px dashed var(--c-border);
+  border-radius: var(--r-lg);
+  color: var(--c-placeholder);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.fileList {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  font-size: 13px;
+}
+
+.uploadZone {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px dashed var(--c-border-strong);
+  border-radius: var(--r-xl);
+  background: var(--c-brand-surface, var(--c-surface));
+}
+
+.summarySections {
+  display: grid;
+  gap: 14px;
+}
+
+.summaryCard {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summaryHeader h3 {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.summaryRows {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.summaryRows dt {
+  color: var(--c-placeholder);
+}
+
+.summaryRows dd {
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1024px) {
+  .grid2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel {
+    padding: 24px 20px;
+  }
+}

@@ -1,0 +1,26 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+  overflow: hidden;
+}
+
+.search {
+  padding: 20px 24px 26px;
+}
+
+.list {
+  flex: 1 1 auto;
+}
+
+.empty {
+  padding: 24px 24px 40px;
+  font-size: 13px;
+  color: var(--c-placeholder);
+}
+
+.footer {
+  padding: 3px 24px 20px;
+}

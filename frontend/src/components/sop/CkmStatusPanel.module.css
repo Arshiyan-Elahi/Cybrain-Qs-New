@@ -1,0 +1,35 @@
+.panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 19px 18px 22px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  margin-top: 9px;
+}
+
+.fact {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--c-text);
+}
+
+.icon {
+  flex: none;
+  color: var(--c-brand);
+}

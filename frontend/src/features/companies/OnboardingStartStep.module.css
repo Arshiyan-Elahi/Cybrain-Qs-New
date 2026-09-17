@@ -1,0 +1,73 @@
+.panel {
+  padding: 33px 25px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 774fr) minmax(0, 413fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+/* ---- Left: the choices ---- */
+.choices {
+  display: flex;
+  flex-direction: column;
+  /* ~82px of air below the option cards, as measured in the design. */
+  padding: 29px 31px 80px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin-top: 11px;
+  max-width: 620px;
+  font-size: 16px;
+  line-height: 19px;
+}
+
+.question {
+  margin-top: 44px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 50px;
+}
+
+.pathBlock {
+  display: grid;
+  gap: 16px;
+  margin-top: 36px;
+}
+
+@media (max-width: 1280px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .choices {
+    padding: 24px 20px;
+  }
+}

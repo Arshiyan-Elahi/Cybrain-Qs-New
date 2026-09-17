@@ -1,0 +1,12 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 37px;
+  padding: 0 19px;
+  border-radius: var(--r-lg);
+  background: var(--c-brand-badge);
+  color: var(--c-brand);
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+}

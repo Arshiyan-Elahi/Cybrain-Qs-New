@@ -1,0 +1,107 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 23px 24px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ---- Headline figures ---- */
+.headline {
+  margin-top: 21px;
+}
+
+.headline:first-of-type {
+  margin-top: 26px;
+}
+
+.headlineTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.headlineLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--c-text);
+}
+
+.readout {
+  flex: none;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--c-text);
+  white-space: nowrap;
+}
+
+.info {
+  flex: none;
+  color: var(--c-border-strong);
+}
+
+.rule {
+  height: 1px;
+  margin: 25px 0 0;
+  border: none;
+  background: var(--c-border-strong);
+}
+
+/* ---- Metric rows ---- */
+.metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  margin-top: 25px;
+}
+
+.metric {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.metricIcon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  border-radius: var(--r-md);
+  background: var(--c-brand-surface);
+  color: var(--c-brand);
+}
+
+.metricBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.metricTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.metricLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--c-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

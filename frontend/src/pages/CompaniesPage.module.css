@@ -1,0 +1,43 @@
+.page {
+  flex: 1 1 auto;
+  padding: 40px 48px 44px;
+}
+
+.container {
+  width: 100%;
+  max-width: none;
+}
+
+/* Language selector sits left of the primary action; the primary action keeps
+   its exact position at the right edge of the content column. */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 378px minmax(0, 1fr);
+  gap: 26px;
+  align-items: start;
+  margin-top: 39px;
+}
+
+.container > :last-child {
+  margin-top: 33px;
+}
+
+/* Account for the application sidebar: at ordinary desktop widths the detail
+   card needs the full content column to keep document and CKM rows readable. */
+@media (max-width: 1500px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding: 32px 24px 36px;
+  }
+}

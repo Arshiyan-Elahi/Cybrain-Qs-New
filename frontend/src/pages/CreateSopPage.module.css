@@ -1,0 +1,74 @@
+.page {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 31px 48px 30px 47px;
+}
+
+/* The design leaves this row's right side empty; the language selector goes
+   there so nothing else moves. */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 56px;
+}
+
+.body {
+  margin-top: 29px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 29px;
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.footer button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Steps 02-06 have no design in the source PDFs. */
+.notDesigned {
+  padding: 72px 34px;
+  border: 1px dashed var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+  text-align: center;
+}
+
+.notDesignedTitle {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.notDesignedText {
+  margin-top: 12px;
+  font-size: 16px;
+  color: var(--c-placeholder);
+}
+
+@media (max-width: 1024px) {
+  .page {
+    padding: 24px 24px 28px;
+  }
+
+  .footer {
+    flex-wrap: wrap;
+  }
+
+  .footerActions {
+    flex-wrap: wrap;
+  }
+}

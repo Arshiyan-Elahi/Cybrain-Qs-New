@@ -1,0 +1,35 @@
+﻿# Dependencies (large, not useful for AI context)
+node_modules/
+.venv/
+venv/
+env/
+
+# Build / generated
+dist/
+dist-ssr/
+build/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+htmlcov/
+*.tsbuildinfo
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Logs and caches
+logs/
+*.log
+.cache/
+.turbo/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.idea/

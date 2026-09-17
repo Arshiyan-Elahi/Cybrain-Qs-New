@@ -1,0 +1,89 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 266px;
+  padding: 45px 18px 0;
+  border: 1.5px solid var(--c-control-border);
+  border-radius: var(--r-xl);
+  background: var(--c-page);
+  color: var(--c-text-muted);
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.card:hover {
+  border-color: var(--c-brand);
+}
+
+.card:focus-within {
+  outline: 2px solid var(--c-brand);
+  outline-offset: 2px;
+}
+
+.cardChecked,
+.cardChecked:hover {
+  border: 2px solid var(--c-brand);
+  background: var(--c-brand-surface);
+  color: var(--c-brand);
+  /* Windows in the glyph are punched through in the card's own background. */
+  --icon-cutout: var(--c-brand-surface);
+}
+
+/* ---- Radio ---- */
+.radio {
+  position: absolute;
+  top: 15px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.6px solid var(--c-control-border);
+  border-radius: var(--r-pill);
+  background: var(--c-page);
+}
+
+.radioChecked {
+  border: 2px solid var(--c-brand);
+  background: transparent;
+}
+
+.radioDot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--c-brand);
+}
+
+/* ---- Content ---- */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  color: currentColor;
+}
+
+.title {
+  margin-top: 17px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  color: currentColor;
+}
+
+.description {
+  margin-top: 15px;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--c-text-muted);
+}
+
+.cardChecked .description {
+  color: var(--c-text);
+}

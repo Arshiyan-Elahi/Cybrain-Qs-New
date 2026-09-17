@@ -1,0 +1,31 @@
+.panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 36px;
+  padding: 30px 41px 32px;
+  border-radius: var(--r-xl);
+  background: var(--c-surface-soft);
+}
+
+.icon {
+  color: var(--c-brand);
+  margin-top: 6px;
+}
+
+.body {
+  min-width: 0;
+}
+
+.title {
+  color: var(--c-brand);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text {
+  margin-top: 13px;
+  font-size: 16px;
+  line-height: 1.19;
+  color: var(--c-text);
+}

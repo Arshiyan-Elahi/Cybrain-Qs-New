@@ -1,0 +1,99 @@
+.panel {
+  padding: 36px 33px 37px 34px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin-top: 10px;
+  max-width: 560px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px 18px;
+  margin-top: 28px;
+  /* Cards in a row share a height — the design aligns their bottom borders. */
+  align-items: stretch;
+}
+
+.suggestionsLabel {
+  margin-top: 28px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.suggestionsLabel + * {
+  margin-top: 24px;
+}
+
+/* ---- Kunde ---- */
+.clientRow {
+  display: flex;
+  align-items: stretch;
+  gap: 9px;
+}
+
+.clientPicker {
+  flex: none;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  padding: 20px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+/* ---- SOP context ----
+   Column offsets are taken from the design: 190 / 386 / 604 on the first row,
+   190 / 442 on the rows below. */
+.contextRows {
+  display: flex;
+  flex-direction: column;
+  gap: 29px;
+}
+
+.contextRowPrimary {
+  display: grid;
+  grid-template-columns: 196px 218px minmax(0, 1fr);
+}
+
+.contextRowSecondary {
+  display: grid;
+  grid-template-columns: 252px minmax(0, 1fr);
+  gap: 29px 0;
+}
+
+@media (max-width: 1400px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .clientRow {
+    flex-direction: column;
+  }
+
+  .clientPicker {
+    width: 100%;
+  }
+
+  .contextRowPrimary,
+  .contextRowSecondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 16px;
+  }
+}
