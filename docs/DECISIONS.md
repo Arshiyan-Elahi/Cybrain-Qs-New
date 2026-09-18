@@ -226,6 +226,35 @@ database engine without an ADR superseding this.
 
 ---
 
+## ADR-0016 — Layout-aware ingestion with optional Docling and pluggable OCR
+
+**Date:** 2026-09-18
+**Status:** Accepted
+
+**Context:** Real pharma/medtech SOPs vary wildly in heading styles, numbering,
+tables and scan quality. Hard-wiring a heavy ML OCR stack into the default
+runtime (currently Python 3.14, lightweight deps) is inappropriate, but the
+pipeline must still normalize formats into one internal structure and refuse
+silent CKM extraction on failed parses.
+
+**Decision:**
+
+- All parsers emit `NormalizedDocument` / `NormalizedBlock` before chunking.
+- DOCX stays on python-docx with multi-signal heading detection.
+- PDF prefers Docling when installed; pypdf remains the default structured
+  fallback.
+- OCR is a provider interface (`NullOcrProvider` default); production engines
+  are registered explicitly. OCR runs only on pages without a reliable text
+  layer.
+- Extraction QA returns explicit PASS / WARNING / FAILED. FAILED and
+  `needs_ocr` do not proceed into chunking/CKM.
+
+**Consequence:** Core ingest works without Docling/OCR wheels. Production
+deployments install Docling and/or register an OCR provider. See
+`backend/app/processing/README.md`.
+
+---
+
 # Open questions
 
 Not yet decided. Each needs an ADR before its phase begins.

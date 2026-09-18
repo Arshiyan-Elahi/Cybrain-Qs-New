@@ -50,13 +50,21 @@ class Settings(BaseSettings):
 
     # --- Observability -----------------------------------------------------
     log_level: str = "INFO"
-    # JSON in deployed environments, human-readable locally.
+    # console (default local) or json (production shippers). log_json kept for
+    # backward compatibility with older .env files.
+    log_format: Literal["console", "json"] = "console"
     log_json: bool = False
+    log_ai_content: bool = False
+    log_ai_content_max_chars: int = 2000
+    log_requests: bool = True
+    log_retrieval: bool = True
+    log_ai_routing: bool = True
+    log_document_processing: bool = True
 
     # --- AI feature flag ---------------------------------------------------
     ai_features_enabled: bool = False
 
-    # --- Local LLM (only used when ai_features_enabled) --------------------
+    # --- Local / remote LLM (only used when ai_features_enabled) ------------
     llm_provider: str = "ollama"
     llm_base_url: str = "http://localhost:11434"
     llm_chat_model: str = "llama3.1:8b"
@@ -64,6 +72,22 @@ class Settings(BaseSettings):
     llm_embedding_dimensions: int = 768
     llm_timeout_seconds: float = 120.0
     llm_api_key: str | None = None
+
+    # --- AI primary/fallback routing ---------------------------------------
+    # auto: remote OpenAI-compatible when healthy, else Gemini + local Nomic.
+    # remote: remote only.  fallback: Gemini LLM + local embeddings only.
+    ai_routing_mode: Literal["auto", "remote", "fallback"] = "auto"
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
+    gemini_timeout_seconds: float = 60.0
+    local_embedding_model: str = "nomic-ai/nomic-embed-text-v1.5"
+    local_embedding_dimensions: int = 768
+    # Cheap remote reachability probe (connect/read); separate from generation timeout.
+    ai_health_timeout_seconds: float = 2.0
+    # After a remote failure, skip re-probing for this many seconds.
+    ai_failover_cooldown_seconds: float = 30.0
+    # Embedding compatibility self-test before allowing remote→local fallback.
+    ai_embedding_compat_min_cosine: float = 0.85
 
     @property
     def cors_origin_list(self) -> list[str]:

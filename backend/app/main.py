@@ -38,7 +38,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     different database.
     """
     settings = settings or get_settings()
-    configure_logging(settings.log_level, as_json=settings.log_json)
+    log_format = "json" if settings.log_json else settings.log_format
+    configure_logging(settings.log_level, log_format=log_format)
 
     app = FastAPI(
         title=settings.app_name,

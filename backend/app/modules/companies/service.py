@@ -1,12 +1,25 @@
+import logging
+import time
 import uuid
 
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.errors import NotFoundError
+from app.core.errors import NotFoundError, PermissionDeniedError
+from app.core.logging import company_id_var, log_event
 from app.modules.companies.models import Company
 from app.modules.companies.repository import CompanyRepository
 from app.modules.companies.schemas import CompanyCreate, CompanyUpdate
+from app.modules.documents.cancellation import operations
+from app.modules.documents.models import Document, DocumentChunk
+from app.modules.knowledge.models import KnowledgeObject, KnowledgeObjectHistory
+
+logger = logging.getLogger("app.companies.delete")
+
+# Strongest role currently issued on create. "admin" is not used yet; do not
+# invent additional RBAC beyond this stored membership role.
+_COMPANY_DELETE_ROLES = frozenset({"owner"})
 
 
 class CompanyService:
@@ -71,6 +84,160 @@ class CompanyService:
         return company
 
     def delete(self, user_id: uuid.UUID, company_id: uuid.UUID) -> None:
+        """
+        Permanently delete a company and every row owned exclusively by it.
+
+        Verified CKM does not block whole-company deletion. Requires the
+        stored membership role ``owner`` (strongest role currently issued).
+        """
         company = self.get(user_id, company_id)
-        self.repo.delete(company)
-        self.db.flush()
+        access = self.repo.get_access(user_id, company_id)
+        if access is None or access.role not in _COMPANY_DELETE_ROLES:
+            raise PermissionDeniedError(
+                "Only a company owner can permanently delete this company.",
+                details={"reason": "company_owner_required"},
+            )
+
+        company_id_var.set(str(company_id))
+        started = time.perf_counter()
+
+        log_event(
+            logger,
+            "company_delete_requested",
+            "Company delete requested",
+            company_id=str(company_id),
+        )
+
+        document_ids = list(
+            self.db.scalars(select(Document.id).where(Document.company_id == company_id)).all()
+        )
+        document_count = len(document_ids)
+        chunk_count = int(
+            self.db.scalar(
+                select(func.count()).select_from(DocumentChunk).where(
+                    DocumentChunk.company_id == company_id
+                )
+            )
+            or 0
+        )
+        embedding_count = int(
+            self.db.scalar(
+                select(func.count()).select_from(DocumentChunk).where(
+                    DocumentChunk.company_id == company_id,
+                    DocumentChunk.embedding.is_not(None),
+                )
+            )
+            or 0
+        )
+        knowledge_count = int(
+            self.db.scalar(
+                select(func.count()).select_from(KnowledgeObject).where(
+                    KnowledgeObject.company_id == company_id
+                )
+            )
+            or 0
+        )
+        history_count = int(
+            self.db.scalar(
+                select(func.count()).select_from(KnowledgeObjectHistory).where(
+                    KnowledgeObjectHistory.company_id == company_id
+                )
+            )
+            or 0
+        )
+
+        # Stop cooperative ingestion before removing rows so stages cannot recreate them.
+        operations.cancel_documents(set(document_ids))
+
+        log_event(
+            logger,
+            "company_delete_started",
+            "Company delete started",
+            company_id=str(company_id),
+            document_count=document_count,
+            chunk_count=chunk_count,
+            embedding_count=embedding_count,
+            knowledge_count=knowledge_count,
+            history_count=history_count,
+        )
+
+        try:
+            # Knowledge first: source_document_id is RESTRICT on documents.
+            self.db.execute(
+                delete(KnowledgeObjectHistory).where(
+                    KnowledgeObjectHistory.company_id == company_id
+                )
+            )
+            self.db.execute(
+                delete(KnowledgeObject).where(KnowledgeObject.company_id == company_id)
+            )
+            self.db.flush()
+            log_event(
+                logger,
+                "company_knowledge_deleted",
+                "Company knowledge and history deleted",
+                company_id=str(company_id),
+                knowledge_count=knowledge_count,
+                history_count=history_count,
+            )
+
+            if chunk_count:
+                self.db.execute(
+                    update(DocumentChunk)
+                    .where(DocumentChunk.company_id == company_id)
+                    .values(embedding=None, embedding_model=None)
+                )
+                self.db.flush()
+                log_event(
+                    logger,
+                    "company_vectors_deleted",
+                    "Company pgvector embeddings cleared",
+                    company_id=str(company_id),
+                    embedding_count=embedding_count,
+                    chunk_count=chunk_count,
+                )
+                self.db.execute(
+                    delete(DocumentChunk).where(DocumentChunk.company_id == company_id)
+                )
+                self.db.flush()
+
+            if document_count:
+                self.db.execute(delete(Document).where(Document.company_id == company_id))
+                self.db.flush()
+            log_event(
+                logger,
+                "company_documents_deleted",
+                "Company documents and chunks deleted",
+                company_id=str(company_id),
+                document_count=document_count,
+                chunk_count=chunk_count,
+            )
+
+            # Cascades: onboarding profile, regulations, user_company_access.
+            self.repo.delete(company)
+            self.db.flush()
+        except Exception as exc:
+            log_event(
+                logger,
+                "company_delete_failed",
+                "Company delete failed",
+                level=40,
+                company_id=str(company_id),
+                error_type=type(exc).__name__,
+                error_message=str(exc)[:300],
+                latency_ms=int((time.perf_counter() - started) * 1000),
+            )
+            raise
+
+        log_event(
+            logger,
+            "company_delete_completed",
+            "Company delete completed",
+            company_id=str(company_id),
+            document_count=document_count,
+            chunk_count=chunk_count,
+            embedding_count=embedding_count,
+            knowledge_count=knowledge_count,
+            history_count=history_count,
+            latency_ms=int((time.perf_counter() - started) * 1000),
+        )

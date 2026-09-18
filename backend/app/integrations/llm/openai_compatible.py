@@ -1,6 +1,7 @@
 import httpx
 
 from app.integrations.llm.base import ChatMessage, Completion
+from app.integrations.llm.embedding_profile import EmbeddingProfile, NOMIC_V15_PROFILE, TaskType
 from app.integrations.llm.errors import (
     classify_httpx_error,
     httpx_timeout,
@@ -28,6 +29,8 @@ class OpenAICompatibleProvider:
         embedding_dimensions: int,
         api_key: str | None = None,
         timeout: float = 120.0,
+        health_timeout: float = 2.0,
+        embedding_profile: EmbeddingProfile | None = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.chat_model = chat_model
@@ -35,6 +38,8 @@ class OpenAICompatibleProvider:
         self.embedding_dimensions = embedding_dimensions
         self.api_key = api_key
         self.timeout = timeout
+        self.health_timeout = health_timeout
+        self.embedding_profile = embedding_profile or NOMIC_V15_PROFILE
 
     @property
     def _headers(self) -> dict[str, str]:
@@ -42,6 +47,10 @@ class OpenAICompatibleProvider:
 
     def _timeout(self) -> httpx.Timeout:
         return httpx_timeout(self.timeout)
+
+    def _health_timeout(self) -> httpx.Timeout:
+        connect = min(self.health_timeout, 2.0)
+        return httpx.Timeout(self.health_timeout, connect=connect)
 
     def _post(self, path: str, payload: dict) -> dict:
         try:
@@ -63,13 +72,38 @@ class OpenAICompatibleProvider:
             raise invalid_response(self.name, f"AI service call failed: {exc}") from exc
 
     def health(self) -> bool:
+        return self.health_llm()
+
+    def health_llm(self) -> bool:
         try:
             response = httpx.get(
                 f"{self.base_url}/models",
                 headers=self._headers,
-                timeout=httpx.Timeout(5.0, connect=2.0),
+                timeout=self._health_timeout(),
             )
             return response.status_code < 400
+        except httpx.HTTPError:
+            return False
+
+    def health_embeddings(self) -> bool:
+        try:
+            response = httpx.get(
+                f"{self.base_url}/models",
+                headers=self._headers,
+                timeout=self._health_timeout(),
+            )
+            if response.status_code >= 400:
+                return False
+            try:
+                data = response.json()
+                rows = data.get("data") if isinstance(data, dict) else None
+                if isinstance(rows, list) and rows:
+                    ids = [r.get("id") for r in rows if isinstance(r, dict)]
+                    if self.embedding_model and self.embedding_model not in ids:
+                        return False
+            except Exception:  # noqa: BLE001
+                pass
+            return True
         except httpx.HTTPError:
             return False
 
@@ -106,10 +140,11 @@ class OpenAICompatibleProvider:
             },
         )
 
-    def embed(self, texts: list[str]) -> list[list[float]]:
+    def embed(self, texts: list[str], *, task: TaskType = "document") -> list[list[float]]:
         if not texts:
             return []
-        data = self._post("/embeddings", {"model": self.embedding_model, "input": texts})
+        prepared = self.embedding_profile.prepare(texts, task=task)
+        data = self._post("/embeddings", {"model": self.embedding_model, "input": prepared})
         rows = data.get("data") or []
         if not isinstance(rows, list):
             raise invalid_response(self.name, "AI service returned invalid embeddings payload.")
@@ -123,4 +158,9 @@ class OpenAICompatibleProvider:
                 self.name,
                 f"AI service returned {len(vectors)} embeddings for {len(texts)} inputs.",
             )
-        return vectors
+        float_vectors = [list(map(float, vector)) for vector in vectors]
+        try:
+            self.embedding_profile.validate_dimensions(float_vectors)
+        except ValueError as exc:
+            raise invalid_response(self.name, str(exc)) from exc
+        return self.embedding_profile.postprocess(float_vectors)

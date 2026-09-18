@@ -2,8 +2,9 @@
   "language": {
     "label": "Sprache"
   },
-  "knowledgeTypes": {"terminology":"Terminologie", "document_structure":"Dokumentstruktur", "writing_style":"Schreibstil", "regulation":"Regularien", "role":"Rollen", "responsibility":"Verantwortlichkeiten", "workflow":"Workflows", "process":"Prozesse", "business_rule":"Geschäftsregeln", "form_or_record":"Records & Formulare", "relationship":"Beziehungen"},
+  "knowledgeTypes": {"terminology":"Terminologie", "document_structure":"Dokumentstruktur", "writing_style":"Schreibstil", "regulation":"Regularien", "role":"Rollen", "responsibility":"Verantwortlichkeiten", "workflow":"Workflows", "process":"Prozesse", "business_rule":"Geschäftsregeln", "form_or_record":"Records & Formulare", "relationship":"Beziehungen", "best_practice":"Best Practices", "ai_preference":"KI- / Qualitätspräferenzen"},
   "knowledgeStatuses": {"proposed":"Vorgeschlagen", "verified":"Bestätigt", "rejected":"Abgelehnt", "superseded":"Ersetzt"},
+  "knowledgeSourceKinds": {"onboarding":"Onboarding", "uploaded_document":"Hochgeladenes Dokument", "human_created":"Menschlich erstellt", "ai_extracted":"KI-extrahiert"},
   "knowledgeTiers": {"company":"Unternehmen", "industry":"Branche", "global":"Global"},
   "nav": {
     "companies": "Unternehmen",
@@ -39,6 +40,16 @@
     "regulations": "Regulatorische Anforderungen",
     "createdAt": "Erstellt am",
     "updatedAt": "Zuletzt aktualisiert",
+    "actionsMenu": "Unternehmensaktionen",
+    "deleteCompany": "Unternehmen löschen",
+    "deleteCompanyTitle": "Unternehmen löschen?",
+    "deleteCompanyLead": "Sie löschen dauerhaft:",
+    "deleteCompanyWarning": "Dies löscht dauerhaft:\n- Unternehmensprofil und Onboarding-Daten\n- Alle hochgeladenen SOPs/Dokumente\n- Alle Dokument-Chunks\n- Alle pgvector-Embeddings\n- Gesamtes vorgeschlagene/abgelehnte/verifizierte Unternehmens-CKM\n- CKM-Evidence/Provenance/Historie dieses Unternehmens\n- Unternehmensspezifischen Verarbeitungszustand\n- Weitere unternehmenseigene generierte Daten\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteCompanyConfirmLabel": "Geben Sie „{{name}}“ zur Bestätigung ein",
+    "deleteCompanyCancel": "Abbrechen",
+    "deleteCompanyPermanently": "Unternehmen dauerhaft löschen",
+    "deletingCompany": "Wird gelöscht…",
+    "deleteCompanySuccess": "{{name}} wurde dauerhaft gelöscht.",
     "sopCount": {
       "unit": "SOP's",
       "documentCount_one": "{{count}} SOP",
@@ -47,9 +58,18 @@
       "filterType": "Nach Typ filtern",
       "filterStatus": "Nach Status filtern",
       "filterDocument": "Nach Dokument filtern",
+      "filterSourceKind": "Nach Quelle filtern",
+      "filterOrigin": "Nach Herkunft filtern",
       "allTypes": "Alle Typen",
       "allStatuses": "Alle Status",
       "allDocuments": "Alle Dokumente",
+      "allSourceKinds": "Alle Quellen",
+      "allOrigins": "Alle Herkünfte",
+      "originOnboarding": "Onboarding",
+      "originDocument": "Dokument / SOP",
+      "sourceKind": "Quelle: {{value}}",
+      "verifiedAt": "Bestätigt: {{value}}",
+      "version": "Version {{value}}",
       "viewMode": "Wissensansicht",
       "viewByType": "Nach Wissenstyp",
       "viewBySop": "Nach SOP",
@@ -70,8 +90,10 @@
         "regulations": "Regularien",
         "records_forms": "Records & Formulare",
         "relationships": "Beziehungen",
+        "best_practices": "Best Practices",
         "document_structure": "Dokumentstruktur",
-        "writing_style": "Schreibstil"
+        "writing_style": "Schreibstil",
+        "ai_preferences": "KI- / Qualitätspräferenzen"
       },
       "description": "Anzahl der hochgeladenen SOPs, die für dieses Company Knowledge Model analysiert wurden.",
       "showDocuments": "Dokumente anzeigen",
@@ -104,16 +126,19 @@
       "noChunks": "Keine strukturierten Abschnitte verfügbar.",
       "tier": "Ebene: {{value}}",
       "embeddingCount": "{{embedded}}/{{chunks}} eingebettet",
+      "retryEmbeddings": "Embeddings erneut versuchen",
+      "retryingEmbeddings": "Einbettung…",
       "delete": "Löschen",
       "deleting": "Wird gelöscht…",
-      "deleteTitle": "Diese SOP dauerhaft löschen?",
-      "deleteWarning": "Extrahierte Chunks, Embeddings und zugehörige ungeprüfte oder vorgeschlagene Extraktionsdaten werden ebenfalls entfernt. Dies kann nicht rückgängig gemacht werden.",
+      "deleteTitle": "SOP löschen?",
+      "deleteWarning": "Dies entfernt dauerhaft:\n- Dokumentdatensatz\n- extrahierte/normalisierte Dokumentdaten\n- Chunks\n- pgvector-Embeddings\n- dokumentbezogene vorgeschlagene CKM-Inhalte\n- Verarbeitungs-/Abbruchzustand\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
       "deletePermanently": "Dauerhaft löschen",
       "deleteSuccess": "{{filename}} wurde gelöscht.",
-      "deleteBlockedTitle": "Löschen blockiert",
-      "deleteBlockedMessage": "Diese SOP wird von verifiziertem Unternehmenswissen referenziert und kann noch nicht gelöscht werden.",
+      "deleteBlockedTitle": "Diese SOP kann noch nicht dauerhaft gelöscht werden.",
+      "deleteBlockedMessage": "Verifiziertes Unternehmenswissen hängt noch von diesem Dokument ab. Prüfen Sie diese Abhängigkeiten vor dem Löschen.",
       "deleteBlockedCount_one": "{{count}} verifiziertes Knowledge Object hängt davon ab.",
       "deleteBlockedCount_other": "{{count}} verifizierte Knowledge Objects hängen davon ab.",
+      "reviewDependencies": "Abhängigkeiten prüfen",
       "status": {
         "uploaded": "Hochgeladen",
         "uploading": "Wird hochgeladen…",
@@ -493,6 +518,46 @@
   "placeholder": {
     "description": "Für diesen Bereich liegt noch kein Design vor.",
     "sopLibrary": "SOP-Bibliothek"
+  },
+  "settings": {
+    "description": "Laufzeit- und Systemkonfiguration für diese Umgebung."
+  },
+  "aiRuntime": {
+    "title": "AI-Laufzeit",
+    "refresh": "Aktualisieren",
+    "loading": "AI-Laufzeit wird geladen…",
+    "loadError": "AI-Laufzeitstatus konnte nicht geladen werden.",
+    "system": "System",
+    "remote": "Remote-AI",
+    "fallbackMode": "Fallback-Modus",
+    "fallbackActive": "Aktiv",
+    "fallbackIdle": "Bereitschaft",
+    "llm": "LLM",
+    "embeddings": "Embeddings",
+    "embeddingLine": "{{model}} · {{dims}} · {{source}}",
+    "geminiFallback": "Gemini-Fallback",
+    "localEmbedding": "Lokale Embeddings",
+    "lastCheck": "Letzter Health-Check",
+    "reason": "Fallback-Grund",
+    "incompatible": "Profil inkompatibel",
+    "overall": {
+      "healthy": "Gesund",
+      "fallback": "Fallback aktiv",
+      "degraded": "Eingeschränkt"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "source": {
+      "remote": "Remote",
+      "gemini": "Gemini API",
+      "local": "Lokal"
+    },
+    "readiness": {
+      "ready": "Bereit",
+      "unavailable": "Nicht verfügbar"
+    }
   },
   "common": {
     "loading": "Wird geladen…",

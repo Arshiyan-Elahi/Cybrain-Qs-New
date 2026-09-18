@@ -13,4 +13,12 @@ httpx==0.28.1
 pgvector==0.5.0
 python-docx==1.2.0
 pypdf==6.16.1
+# Optional production PDF/OCR stack (heavy; not required for core ingest):
+#   pip install docling
+# Docling is auto-detected when present; pypdf remains the default fallback.
+# OCR engines are pluggable via app.processing.ocr (NullOcrProvider by default).
+# Local embedding fallback (auto-routing when remote Nomic is offline):
+sentence-transformers>=3.0.0
+einops>=0.8.0
 pytest==9.1.1
+reportlab==4.4.4  # PDF fixtures for ingestion regression tests only

@@ -94,6 +94,14 @@ class CompanyRepository:
         self.db.add(UserCompanyAccess(user_id=user_id, company_id=company_id, role=role))
         self.db.flush()
 
+    def get_access(self, user_id: uuid.UUID, company_id: uuid.UUID) -> UserCompanyAccess | None:
+        return self.db.scalar(
+            select(UserCompanyAccess).where(
+                UserCompanyAccess.user_id == user_id,
+                UserCompanyAccess.company_id == company_id,
+            )
+        )
+
     def delete(self, company: Company) -> None:
         self.db.delete(company)
         self.db.flush()

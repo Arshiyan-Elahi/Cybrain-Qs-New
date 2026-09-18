@@ -49,6 +49,9 @@ def get_current_user(
     user = users.get_by_id(user_id)
     if user is None or not user.is_active:
         raise AuthenticationError("Account is unavailable.")
+    from app.core.logging import user_id_var
+
+    user_id_var.set(str(user.id))
     return user
 
 

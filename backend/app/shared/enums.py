@@ -25,9 +25,19 @@ class KnowledgeStatus(StrEnum):
     SUPERSEDED = "superseded"
 
 
+class KnowledgeSourceKind(StrEnum):
+    """How a Knowledge Object entered the CKM — distinct from extraction_method."""
+
+    ONBOARDING = "onboarding"
+    UPLOADED_DOCUMENT = "uploaded_document"
+    HUMAN_CREATED = "human_created"
+    AI_EXTRACTED = "ai_extracted"
+
+
 class KnowledgeType(StrEnum):
     TERMINOLOGY = "terminology"
     ROLE = "role"
+    RESPONSIBILITY = "responsibility"
     PROCESS = "process"
     REGULATION = "regulation"
     DOCUMENT_STANDARD = "document_standard"
@@ -36,6 +46,9 @@ class KnowledgeType(StrEnum):
     DOCUMENT_STRUCTURE = "document_structure"
     WORKFLOW = "workflow"
     BUSINESS_RULE = "business_rule"
+    RELATIONSHIP = "relationship"
+    BEST_PRACTICE = "best_practice"
+    AI_PREFERENCE = "ai_preference"
 
 
 class DocumentStatus(StrEnum):

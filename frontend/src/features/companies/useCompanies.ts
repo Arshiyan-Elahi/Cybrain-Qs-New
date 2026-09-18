@@ -57,5 +57,13 @@ export function useCompanies(search: string) {
     });
   }, []);
 
-  return { ...state, refresh, upsertCompany };
+  /** Remove a company from the local list immediately after permanent delete. */
+  const removeCompany = useCallback((companyId: string) => {
+    setState((previous) => ({
+      ...previous,
+      companies: previous.companies.filter((entry) => entry.id !== companyId),
+    }));
+  }, []);
+
+  return { ...state, refresh, upsertCompany, removeCompany };
 }

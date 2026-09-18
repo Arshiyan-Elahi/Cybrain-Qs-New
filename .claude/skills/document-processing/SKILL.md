@@ -5,9 +5,11 @@ description: PDF/DOCX ingestion for Cybrain QS — implemented extraction and st
 
 # Document processing
 
-> **Current state.** PDF/DOCX extraction, scanned-document detection,
-> structure-aware chunking and persistence are implemented. Candidate Knowledge
-> Object extraction and the provenance/verification workflow are not.
+> **Current state.** PDF/DOCX extraction, scanned/mixed/digital classification,
+> optional Docling PDF path, pluggable OCR provider, structure normalization,
+> extraction QA (PASS/WARNING/FAILED), structure-aware chunking and persistence
+> are implemented. Candidate Knowledge Object extraction and the
+> provenance/verification workflow are not.
 
 Client documents — existing SOPs, templates, policies — are the raw material the
 CKM is built from. This pipeline is the origin of provenance, so getting it right
@@ -16,8 +18,10 @@ determines whether the whole system is auditable.
 ## Pipeline
 
 ```
-upload ──▶ ingest ──▶ parse ──▶ segment ──▶ analyse ──▶ candidate Knowledge Objects
- (company-scoped)   (structure) (chunks)  (extraction)   (all status = proposed)
+upload ──▶ classify ──▶ format extract ──▶ normalize ──▶ extraction QA
+                                                          │
+                     chunk ◀── (PASS/WARNING only) ◀──────┘
+                     (FAILED / needs OCR does not enter CKM)
 ```
 
 Each stage records what it did. A Knowledge Object emitted at the end must be
@@ -37,9 +41,9 @@ version.
   version, location within the document, extractor identity and version,
   timestamp. If location cannot be determined, that is a pipeline defect, not an
   acceptable null.
-- **Parsing failures are surfaced, not swallowed.** A document that partially
-  parsed must be visibly partial. Silent truncation produces confidently wrong
-  company knowledge.
+- **Parsing failures are surfaced, not swallowed.** QA status is explicit
+  PASS / WARNING / FAILED from observable checks — never invented confidence
+  percentages. FAILED extraction must not proceed into CKM extraction.
 
 ## Structure matters more than text
 
@@ -48,22 +52,25 @@ lists, referenced forms, revision history. Extracting a flat text blob throws
 away exactly the signal the CKM needs.
 
 Preserve: heading hierarchy and numbering, tables as tables, lists as lists,
-headers/footers (they carry document control metadata), and cross-references to
-other SOPs and forms.
+headers/footers (they carry document control metadata; mark repeated furniture
+non-semantic), approval/signature blocks, revision history and appendices.
+
+Parsers emit a shared `NormalizedDocument` / `NormalizedBlock` schema before
+chunking. Fixed SOP section names (PURPOSE/SCOPE/…) are weak hints only.
 
 ## Chunking
 
 Chunk on document structure — section and subsection boundaries — not on a fixed
 character count that splits mid-table or mid-procedure. Each chunk keeps its
-heading path so retrieval knows where it came from. Chunk size and boundary
-strategy are an open question in `docs/DECISIONS.md` and need an ADR before
-implementation.
+heading path so retrieval knows where it came from. Non-semantic furniture is
+excluded from embeddings unless explicitly required.
 
 ## Practical notes
 
-- PDFs in this project have been vector-based with text as outlines; text
-  extraction fragments words across spans. Client PDFs will vary and some will be
-  scanned — plan for the OCR case explicitly rather than assuming text exists.
+- PDF: Docling is preferred when installed; pypdf is the built-in fallback.
+- Scanned/mixed pages invoke the pluggable OCR provider only where the text
+  layer is unreliable. Default provider records the need without inventing text.
+- Recommended production OCR: Docling OCR, Tesseract/ocrmypdf with layout output.
 - Long-running work is queued, never done inside an HTTP request.
 - Uploaded files are untrusted input: validate type and size, and never execute
   or template anything derived from document content.
@@ -79,4 +86,4 @@ implementation.
 ## See also
 
 `docs/DOMAIN_MODEL.md` §5–§8, `ckm-domain`, `postgres-database`,
-`docs/DECISIONS.md` open questions.
+`backend/app/processing/README.md`, `docs/DECISIONS.md` open questions.

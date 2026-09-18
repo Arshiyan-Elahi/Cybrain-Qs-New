@@ -10,6 +10,7 @@ import {
   getDocument,
   listDocumentChunks,
   listDocuments,
+  retryDocumentEmbeddings,
   uploadDocument,
 } from '../../services/documents';
 import {
@@ -38,6 +39,7 @@ import {
   headingPathsFromPayload,
   knowledgeDetails,
   objectMatchesDocument,
+  objectMatchesOrigin,
   verifiedDependencyCount,
   type StructureNode,
 } from './knowledgeGrouping';
@@ -153,10 +155,17 @@ function KnowledgeItemCard({
         <div className={styles.knowledgeMeta}>
           <span>{t('companyDetail.sopCount.tier', { value: t(`knowledgeTiers.${item.tier}`) })}</span>
           <span>{t('companyDetail.sopCount.knowledgeStatus', { value: t(`knowledgeStatuses.${item.status}`) })}</span>
+          <span>{t('companyDetail.sopCount.sourceKind', { value: t(`knowledgeSourceKinds.${item.sourceKind}`) })}</span>
           {sources.length > 1 ? (
             <span>{t('companyDetail.sopCount.sourcesCount', { count: sources.length })}: {sources.map((source) => source.documentName).join(', ')}</span>
           ) : (
             <span>{t('companyDetail.sopCount.provenance')}: {item.sourceDocumentName} · {item.sourceLocation}</span>
+          )}
+          {item.verifiedAt && (
+            <span>{t('companyDetail.sopCount.verifiedAt', { value: item.verifiedAt })}</span>
+          )}
+          {item.version > 1 && (
+            <span>{t('companyDetail.sopCount.version', { value: item.version })}</span>
           )}
         </div>
       </div>
@@ -272,6 +281,7 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [embeddingRetryIds, setEmbeddingRetryIds] = useState<Set<string>>(new Set());
   const [expandedDocumentId, setExpandedDocumentId] = useState<string | null>(null);
   const [chunks, setChunks] = useState<Record<string, DocumentChunk[]>>({});
   const [chunkError, setChunkError] = useState<string | null>(null);
@@ -286,6 +296,8 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [documentFilter, setDocumentFilter] = useState('all');
+  const [sourceKindFilter, setSourceKindFilter] = useState('all');
+  const [originFilter, setOriginFilter] = useState('all');
   const [viewMode, setViewMode] = useState<KnowledgeViewMode>('byType');
   const [openTypeSections, setOpenTypeSections] = useState<Set<string>>(new Set());
   const [openSopIds, setOpenSopIds] = useState<Set<string>>(new Set());
@@ -298,8 +310,10 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
   const filteredKnowledge = useMemo(() => knowledge.filter((item) =>
     (typeFilter === 'all' || item.type === typeFilter) &&
     (statusFilter === 'all' || item.status === statusFilter) &&
+    (sourceKindFilter === 'all' || item.sourceKind === sourceKindFilter) &&
+    (originFilter === 'all' || objectMatchesOrigin(item, originFilter)) &&
     (documentFilter === 'all' || objectMatchesDocument(item, documentFilter))),
-  [knowledge, typeFilter, statusFilter, documentFilter]);
+  [knowledge, typeFilter, statusFilter, documentFilter, sourceKindFilter, originFilter]);
 
   const typeSections = useMemo(
     () => groupBySectionTypes(filteredKnowledge, KNOWLEDGE_TYPE_SECTIONS),
@@ -363,6 +377,8 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
     setTypeFilter('all');
     setStatusFilter('all');
     setDocumentFilter('all');
+    setSourceKindFilter('all');
+    setOriginFilter('all');
   }, [companyId]);
 
   useEffect(() => {
@@ -394,7 +410,7 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
       const [nextStats, page, knowledgeItems] = await Promise.all([
         getCompanyStats(companyId),
         listDocuments(companyId),
-        listAllKnowledgeObjects(companyId),
+        listAllKnowledgeObjects(companyId, { includeSuperseded: true }),
       ]);
       setStats(nextStats);
       setDocuments(
@@ -524,6 +540,28 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
       }
     } finally {
       setDeletingIds((current) => {
+        const next = new Set(current);
+        next.delete(documentId);
+        return next;
+      });
+    }
+  };
+
+  const handleRetryEmbeddings = async (document: DocumentDetail) => {
+    const documentId = document.id;
+    setEmbeddingRetryIds((current) => new Set(current).add(documentId));
+    setLoadError(null);
+    try {
+      const updated = await retryDocumentEmbeddings(companyId, documentId);
+      setDocuments((current) =>
+        current.map((item) => (item.id === documentId ? updated : item)),
+      );
+      await refresh();
+      onChanged?.();
+    } catch (caught) {
+      setLoadError(caught instanceof Error ? caught.message : t('common.requestFailed'));
+    } finally {
+      setEmbeddingRetryIds((current) => {
         const next = new Set(current);
         next.delete(documentId);
         return next;
@@ -698,6 +736,20 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
                   ? `${t('companyDetail.sopCount.embeddingCount', { embedded: document.embeddedChunkCount, chunks: document.semanticChunkCount })} · ${t('companyDetail.sopCount.status.embedding')}`
                   : t('companyDetail.sopCount.status.completed')
                 : t(`companyDetail.sopCount.status.${document.status}`)}</span>
+              {stats?.aiFeaturesEnabled
+                && document.status === 'processed'
+                && document.embeddedChunkCount < document.semanticChunkCount && (
+                <Button
+                  variant="outline"
+                  size="xs"
+                  disabled={embeddingRetryIds.has(document.id)}
+                  onClick={() => void handleRetryEmbeddings(document)}
+                >
+                  {embeddingRetryIds.has(document.id)
+                    ? t('companyDetail.sopCount.retryingEmbeddings')
+                    : t('companyDetail.sopCount.retryEmbeddings')}
+                </Button>
+              )}
               <Button
                 variant="neutral"
                 size="xs"
@@ -779,9 +831,20 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
           </select>
           <select aria-label={t('companyDetail.sopCount.filterStatus')} value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
             <option value="all">{t('companyDetail.sopCount.allStatuses')}</option>
-            {['proposed', 'verified', 'rejected'].map((status) => (
+            {['proposed', 'verified', 'rejected', 'superseded'].map((status) => (
               <option key={status} value={status}>{t(`knowledgeStatuses.${status}`)}</option>
             ))}
+          </select>
+          <select aria-label={t('companyDetail.sopCount.filterSourceKind')} value={sourceKindFilter} onChange={(event) => setSourceKindFilter(event.target.value)}>
+            <option value="all">{t('companyDetail.sopCount.allSourceKinds')}</option>
+            {['onboarding', 'uploaded_document', 'ai_extracted', 'human_created'].map((kind) => (
+              <option key={kind} value={kind}>{t(`knowledgeSourceKinds.${kind}`)}</option>
+            ))}
+          </select>
+          <select aria-label={t('companyDetail.sopCount.filterOrigin')} value={originFilter} onChange={(event) => setOriginFilter(event.target.value)}>
+            <option value="all">{t('companyDetail.sopCount.allOrigins')}</option>
+            <option value="onboarding">{t('companyDetail.sopCount.originOnboarding')}</option>
+            <option value="document">{t('companyDetail.sopCount.originDocument')}</option>
           </select>
           <select aria-label={t('companyDetail.sopCount.filterDocument')} value={documentFilter} onChange={(event) => setDocumentFilter(event.target.value)}>
             <option value="all">{t('companyDetail.sopCount.allDocuments')}</option>
@@ -947,7 +1010,20 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
             <p>{t('companyDetail.sopCount.deleteBlockedMessage')}</p>
             <p>{t('companyDetail.sopCount.deleteBlockedCount', { count: blockedDelete.count })}</p>
             <div className={styles.confirmActions}>
-              <Button size="sm" onClick={() => setBlockedDelete(null)}>{t('companyDetail.sopCount.close')}</Button>
+              <Button variant="neutral" size="sm" onClick={() => setBlockedDelete(null)}>
+                {t('companyDetail.sopCount.cancel')}
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setDocumentFilter(blockedDelete.document.id);
+                  setStatusFilter('verified');
+                  setViewMode('byType');
+                  setBlockedDelete(null);
+                }}
+              >
+                {t('companyDetail.sopCount.reviewDependencies')}
+              </Button>
             </div>
           </section>
         </div>

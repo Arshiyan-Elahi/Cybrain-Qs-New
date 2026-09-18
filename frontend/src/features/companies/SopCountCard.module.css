@@ -303,7 +303,7 @@
   background: var(--c-surface);
 }
 
-.confirmModal p { margin-top: 14px; line-height: 1.5; }
+.confirmModal p { margin-top: 14px; line-height: 1.5; white-space: pre-line; }
 .confirmActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .deleteError { color: var(--c-error); }
 .deleteSuccess { margin-top: 12px; color: var(--c-brand); font-size: 13px; }

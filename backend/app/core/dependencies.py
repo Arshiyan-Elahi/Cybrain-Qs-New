@@ -30,9 +30,9 @@ def require_ai_ready(settings: AppSettings) -> None:
     """
     AI flag plus a cheap reachability probe.
 
-    Used by knowledge extraction so a powered-off remote LM Studio host fails
-    in seconds with AI_SERVICE_UNAVAILABLE instead of holding the request open
-    until the browser reports a misleading network/CORS error.
+    Used by knowledge extraction so a powered-off remote host fails in seconds
+    with AI_SERVICE_UNAVAILABLE instead of holding the request open. With auto
+    routing, Gemini counts as ready when the remote is offline.
     """
     require_ai_enabled(settings)
     from app.integrations.llm.factory import get_llm_provider

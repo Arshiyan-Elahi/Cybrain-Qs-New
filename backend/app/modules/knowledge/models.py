@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.shared.enums import KnowledgeStatus, KnowledgeTier
+from app.shared.enums import KnowledgeSourceKind, KnowledgeStatus, KnowledgeTier
 from app.shared.models import Base, TimestampMixin
 
 
@@ -14,14 +14,11 @@ class KnowledgeObject(Base, TimestampMixin):
     """
     The atomic unit of the Company Knowledge Model.
 
-    Three invariants are enforced here rather than left to application code:
-
-    1. Anything a model produces is `proposed`. Reaching `verified` requires
-       `verified_by` and `verified_at`, checked by the database.
-    2. Provenance is mandatory: source document, location and extraction method
-       are NOT NULL, so an unattributable fact cannot be stored.
-    3. `company_id` and `tier` are columns, so retrieval filters on them before
-       any vector search and never merges tiers silently.
+    Invariants:
+    1. Automatic output enters as `proposed`; verified requires verifier + time.
+    2. Provenance is mandatory via `source_kind` plus location/method; document
+       FK is required except for onboarding and human-created rows.
+    3. `company_id` and `tier` are columns so isolation/tier never rely on JSON.
     """
 
     __tablename__ = "knowledge_objects"
@@ -36,6 +33,14 @@ class KnowledgeObject(Base, TimestampMixin):
         CheckConstraint(
             "status IN ('proposed', 'verified', 'rejected', 'superseded')",
             name="ck_knowledge_status",
+        ),
+        CheckConstraint(
+            "source_kind IN ('onboarding', 'uploaded_document', 'human_created', 'ai_extracted')",
+            name="ck_knowledge_source_kind",
+        ),
+        CheckConstraint(
+            "source_document_id IS NOT NULL OR source_kind IN ('onboarding', 'human_created')",
+            name="ck_knowledge_source_document_or_kind",
         ),
     )
 
@@ -56,21 +61,23 @@ class KnowledgeObject(Base, TimestampMixin):
     )
 
     label: Mapped[str] = mapped_column(String(500), nullable=False)
-    # Type-specific body; shape varies by `type`, so JSONB rather than columns.
     payload: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
 
-    # --- Provenance (mandatory) -------------------------------------------
-    source_document_id: Mapped[uuid.UUID] = mapped_column(
+    # --- Provenance --------------------------------------------------------
+    source_kind: Mapped[str] = mapped_column(
+        String(32), default=KnowledgeSourceKind.UPLOADED_DOCUMENT, nullable=False, index=True
+    )
+    source_document_id: Mapped[uuid.UUID | None] = mapped_column(
         PGUUID(as_uuid=True),
         ForeignKey("documents.id", ondelete="RESTRICT"),
         index=True,
-        nullable=False,
+        nullable=True,
     )
     source_chunk_id: Mapped[uuid.UUID | None] = mapped_column(
         PGUUID(as_uuid=True),
         ForeignKey("document_chunks.id", ondelete="RESTRICT"),
         index=True,
-        nullable=True,  # nullable only for legacy objects created before chunk provenance existed
+        nullable=True,
     )
     source_location: Mapped[str] = mapped_column(Text, nullable=False)
     extraction_method: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -78,10 +85,50 @@ class KnowledgeObject(Base, TimestampMixin):
     model_provider: Mapped[str | None] = mapped_column(String(64), nullable=True)
     extracted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    # --- Human verification ------------------------------------------------
     verified_by: Mapped[uuid.UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    rejected_by: Mapped[uuid.UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    rejected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    supersedes_id: Mapped[uuid.UUID | None] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("knowledge_objects.id", ondelete="SET NULL"),
+        index=True,
+        nullable=True,
+    )
 
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+
+
+class KnowledgeObjectHistory(Base, TimestampMixin):
+    """Append-only audit trail for CKM review and revision actions."""
+
+    __tablename__ = "knowledge_object_history"
+
+    id: Mapped[uuid.UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("companies.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    knowledge_object_id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("knowledge_objects.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    action: Mapped[str] = mapped_column(String(32), nullable=False)
+    actor_id: Mapped[uuid.UUID | None] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    label: Mapped[str] = mapped_column(String(500), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    source_kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    evidence_snapshot: Mapped[list] = mapped_column(JSONB, default=list, nullable=False)
+    payload_snapshot: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)

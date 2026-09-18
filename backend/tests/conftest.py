@@ -93,11 +93,15 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
     app = create_app()
 
     def override_get_db() -> Generator[Session, None, None]:
+        # Savepoint per request so HTTP 4xx/5xx can roll back request writes
+        # without aborting the outer test transaction.
+        nested = db_session.begin_nested()
         try:
             yield db_session
             db_session.flush()
+            nested.commit()
         except Exception:
-            db_session.rollback()
+            nested.rollback()
             raise
 
     app.dependency_overrides[get_db] = override_get_db

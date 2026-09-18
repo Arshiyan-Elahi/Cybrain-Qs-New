@@ -69,6 +69,16 @@ export function deleteDocument(companyId: string, documentId: string): Promise<v
   });
 }
 
+export function retryDocumentEmbeddings(
+  companyId: string,
+  documentId: string,
+): Promise<DocumentDetail> {
+  return request<DocumentDetail>(
+    `/companies/${companyId}/documents/${documentId}/embeddings`,
+    { method: 'POST' },
+  );
+}
+
 export function listDocumentChunks(
   companyId: string,
   documentId: string,

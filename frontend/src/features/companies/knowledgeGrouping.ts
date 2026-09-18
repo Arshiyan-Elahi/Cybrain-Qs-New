@@ -12,8 +12,10 @@ export const KNOWLEDGE_TYPE_SECTIONS = [
   { id: 'regulations', types: ['regulation'] },
   { id: 'records_forms', types: ['form_or_record'] },
   { id: 'relationships', types: ['relationship'] },
+  { id: 'best_practices', types: ['best_practice'] },
   { id: 'document_structure', types: ['document_structure'] },
   { id: 'writing_style', types: ['writing_style'] },
+  { id: 'ai_preferences', types: ['ai_preference'] },
 ] as const;
 
 /** Subsections inside a By SOP accordion (Document Structure first). */
@@ -40,6 +42,7 @@ export interface StructureNode {
 export function evidenceSources(item: KnowledgeObject): KnowledgeEvidence[] {
   const raw = item.payload.evidence;
   if (!Array.isArray(raw) || raw.length === 0) {
+    if (!item.sourceDocumentId) return [];
     return [{ documentId: item.sourceDocumentId, documentName: item.sourceDocumentName }];
   }
   const seen = new Map<string, KnowledgeEvidence>();
@@ -56,9 +59,18 @@ export function evidenceSources(item: KnowledgeObject): KnowledgeEvidence[] {
     });
   }
   if (seen.size === 0) {
+    if (!item.sourceDocumentId) return [];
     return [{ documentId: item.sourceDocumentId, documentName: item.sourceDocumentName }];
   }
   return [...seen.values()];
+}
+
+export function objectMatchesOrigin(item: KnowledgeObject, origin: string): boolean {
+  if (origin === 'onboarding') return item.sourceKind === 'onboarding';
+  if (origin === 'document') {
+    return item.sourceKind === 'uploaded_document' || item.sourceKind === 'ai_extracted';
+  }
+  return true;
 }
 
 export function objectMatchesDocument(item: KnowledgeObject, documentId: string): boolean {

@@ -38,7 +38,8 @@ export type IconName =
   | 'terminology'
   | 'regulatoryScan'
   | 'workflowExtract'
-  | 'metadataExtract';
+  | 'metadataExtract'
+  | 'moreVertical';
 
 interface IconProps {
   name: IconName;
@@ -452,6 +453,17 @@ export function Icon({ name, size = 24, strokeWidth = 2, className, style }: Ico
             <path d="M3.3 6.4 4.6 9.9 8 8.6" />
             <path d="M19.4 14.4a7.7 7.7 0 0 1-5.3 5.9" />
             <path d="M20.7 17.6 19.4 14.1 16 15.4" />
+          </g>
+        </svg>
+      );
+
+    case 'moreVertical':
+      return (
+        <svg {...common}>
+          <g fill="currentColor">
+            <circle cx="12" cy="5" r="1.6" />
+            <circle cx="12" cy="12" r="1.6" />
+            <circle cx="12" cy="19" r="1.6" />
           </g>
         </svg>
       );

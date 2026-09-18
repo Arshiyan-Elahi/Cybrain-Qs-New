@@ -60,6 +60,23 @@ class CancellationRegistry:
             with self._lock:
                 self._states.pop(operation_id, None)
 
+    def cancel_documents(self, document_ids: set[uuid.UUID]) -> int:
+        """Cancel every in-flight operation bound to any of the given documents."""
+        if not document_ids:
+            return 0
+        with self._lock:
+            matches = [
+                (operation_id, state)
+                for operation_id, state in self._states.items()
+                if state.document_id in document_ids
+            ]
+        for operation_id, state in matches:
+            state.event.set()
+            state.stage, state.status = "cancelling", "cancelling"
+            with self._lock:
+                self._states.pop(operation_id, None)
+        return len(matches)
+
 
 operations = CancellationRegistry()
 

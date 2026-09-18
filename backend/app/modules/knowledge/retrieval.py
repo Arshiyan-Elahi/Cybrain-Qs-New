@@ -1,12 +1,16 @@
+import time
 import uuid
 from dataclasses import dataclass
 
 from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
+from app.core.logging import company_id_var, get_logger, log_event, logging_flags, maybe_content
 from app.shared.enums import KnowledgeTier
 from app.integrations.llm.base import LLMProvider
 from app.modules.documents.models import Document, DocumentChunk
+
+logger = get_logger("app.retrieval")
 
 
 @dataclass
@@ -62,12 +66,65 @@ class RetrievalService:
         limit: int = 5,
         tiers: list[str] | None = None,
     ) -> list[RetrievedChunk]:
-        vectors = self.llm.embed([query])
+        company_id_var.set(str(company_id))
+        flags = logging_flags()
+        started = time.perf_counter()
+        if flags.get("log_retrieval", True):
+            log_event(
+                logger,
+                "retrieval_started",
+                "Retrieval started",
+                company_id=str(company_id),
+                query=maybe_content(
+                    query,
+                    enabled=flags.get("log_ai_content", False),
+                    max_chars=flags.get("log_ai_content_max_chars", 2000),
+                )
+                or (query[:120] + ("..." if len(query) > 120 else "")),
+                mode="semantic",
+                top_k=limit,
+            )
+        try:
+            vectors = self.llm.embed([query], task="query")  # type: ignore[call-arg]
+        except TypeError:
+            vectors = self.llm.embed([query])
         if not vectors:
+            if flags.get("log_retrieval", True):
+                log_event(
+                    logger,
+                    "retrieval_completed",
+                    "Retrieval completed with no vector",
+                    company_id=str(company_id),
+                    result_count=0,
+                    latency_ms=int((time.perf_counter() - started) * 1000),
+                    results=[],
+                )
             return []
-        return self.search_by_vector(
+        hits = self.search_by_vector(
             company_id=company_id, vector=vectors[0], limit=limit, tiers=tiers
         )
+        if flags.get("log_retrieval", True):
+            results = [
+                {
+                    "rank": index,
+                    "chunk_id": str(hit.chunk_id),
+                    "document_id": str(hit.document_id),
+                    "document": hit.document_filename,
+                    "section": " > ".join(hit.heading_path) if hit.heading_path else hit.location,
+                    "similarity_score": round(hit.similarity, 4),
+                }
+                for index, hit in enumerate(hits, start=1)
+            ]
+            log_event(
+                logger,
+                "retrieval_completed",
+                f"Retrieval completed with {len(hits)} hits",
+                company_id=str(company_id),
+                result_count=len(hits),
+                latency_ms=int((time.perf_counter() - started) * 1000),
+                results=results,
+            )
+        return hits
 
     def search_by_vector(
         self,

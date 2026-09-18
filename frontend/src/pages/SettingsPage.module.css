@@ -1,0 +1,7 @@
+.page {
+  flex: 1 1 auto;
+  padding: 40px 48px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}

@@ -6,6 +6,7 @@ import { CompaniesPage } from '../pages/CompaniesPage';
 import { CompanyOnboardingPage } from '../pages/CompanyOnboardingPage';
 import { CreateSopPage } from '../pages/CreateSopPage';
 import { LoginPage } from '../pages/LoginPage';
+import { SettingsPage } from '../pages/SettingsPage';
 import { PlaceholderPage } from '../pages/PlaceholderPage';
 
 /** Rail destinations that exist in the navigation but have no design yet. */
@@ -16,7 +17,6 @@ const PLACEHOLDER_ROUTES = [
   { path: ROUTES.assistant, titleKey: 'nav.assistant' },
   { path: ROUTES.records, titleKey: 'nav.records' },
   { path: ROUTES.alerts, titleKey: 'nav.alerts' },
-  { path: ROUTES.settings, titleKey: 'nav.settings' },
   { path: ROUTES.help, titleKey: 'nav.help' },
 ];
 
@@ -65,6 +65,15 @@ export function AppRoutes() {
         element={
           <Protected navigation="rail">
             <CreateSopPage />
+          </Protected>
+        }
+      />
+
+      <Route
+        path={ROUTES.settings}
+        element={
+          <Protected navigation="rail">
+            <SettingsPage />
           </Protected>
         }
       />

@@ -1,0 +1,103 @@
+.card {
+  max-width: 560px;
+  padding: 20px 24px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--c-text);
+}
+
+.refresh {
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text-soft);
+  padding: 6px 12px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.refresh:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.grid {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.row dt {
+  margin: 0;
+  color: var(--c-text-muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.row dd {
+  margin: 0;
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+.row dd[data-tone='healthy'],
+.row dd[data-tone='online'] {
+  color: #1f6b3a;
+}
+
+.row dd[data-tone='fallback_active'] {
+  color: #8a5a00;
+}
+
+.row dd[data-tone='degraded'],
+.row dd[data-tone='offline'] {
+  color: var(--c-error);
+}
+
+.source {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--c-text-muted);
+  font-size: 13px;
+}
+
+.muted {
+  margin: 0;
+  color: var(--c-text-muted);
+  font-size: 13px;
+}
+
+.error {
+  margin: 0 0 12px;
+  color: var(--c-error);
+  font-size: 13px;
+}
+
+.reason {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--c-text-soft);
+}

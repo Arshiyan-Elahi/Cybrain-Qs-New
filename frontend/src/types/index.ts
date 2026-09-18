@@ -91,6 +91,12 @@ export interface KnowledgeEvidence {
   snippet?: string;
 }
 
+export type KnowledgeSourceKind =
+  | 'onboarding'
+  | 'uploaded_document'
+  | 'human_created'
+  | 'ai_extracted';
+
 export interface KnowledgeObject {
   id: string;
   companyId: string;
@@ -99,7 +105,8 @@ export interface KnowledgeObject {
   status: 'proposed' | 'verified' | 'rejected' | 'superseded';
   label: string;
   payload: Record<string, unknown>;
-  sourceDocumentId: string;
+  sourceKind: KnowledgeSourceKind;
+  sourceDocumentId: string | null;
   sourceDocumentName: string;
   sourceChunkId: string | null;
   sourceLocation: string;
@@ -109,6 +116,9 @@ export interface KnowledgeObject {
   extractedAt: string;
   verifiedBy: string | null;
   verifiedAt: string | null;
+  rejectedBy: string | null;
+  rejectedAt: string | null;
+  supersedesId: string | null;
   version: number;
 }
 
@@ -116,6 +126,25 @@ export interface KnowledgeExtractionResult {
   created: number;
   skippedChunks: number;
   status: 'completed' | 'cancelled';
+}
+
+export interface KnowledgeOnboardingResult {
+  created: number;
+}
+
+export interface KnowledgeHistoryEntry {
+  id: string;
+  knowledgeObjectId: string;
+  action: string;
+  actorId: string | null;
+  label: string;
+  status: string;
+  sourceKind: KnowledgeSourceKind;
+  version: number;
+  evidenceSnapshot: unknown[];
+  payloadSnapshot: Record<string, unknown>;
+  detail: string | null;
+  createdAt: string;
 }
 
 /** Questionnaire answers persisted with a newly created company. */

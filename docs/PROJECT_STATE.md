@@ -13,33 +13,34 @@ planning, not formal metrics.
 | --- | --- | ---: | --- |
 | Frontend shell, i18n, auth UI | Implemented | 85% | Design-backed screens for placeholder nav routes |
 | Companies CRUD + detail | Implemented | 90% | Role-based action gating in UI |
-| Company onboarding UI | Partial | 60% | Full CKM-building path; auto KO extraction from onboarding |
-| Documents upload + processing | Implemented | 75% | Durable file storage, OCR, background jobs |
+| Company onboarding UI | Partial | 75% | Dedicated CKM page polish beyond company create |
+| Documents upload + processing | Implemented | 82% | Durable file storage, production OCR engine wiring, background jobs |
 | Auth (JWT) | Implemented | 80% | Refresh/revocation; role enforcement |
-| Knowledge Objects API | Partial | 55% | Provenance-complete review UX; richer verification audit |
+| Knowledge Objects API | Implemented | 85% | Dedicated `/knowledge` product page; richer history UI |
 | pgvector retrieval | Partial | 40% | Public retrieval API + end-to-end UI |
 | Local LLM adapters | Implemented | 70% | Production model/embed-dim decisions |
-| CKM management product | Partial | 35% | Full lifecycle, tiers UX, isolation proofs in product flows |
+| CKM management product | Partial | 70% | Standalone CKM route; tier presentation polish |
 | SOP wizard | Partial | 15% | Steps 02–06, Blueprint, mapping, editor |
 | SOP backend + generation | Missing | 5% | Models, APIs, grounded draft pipeline |
 | SOP approval / versioning | Missing | 0% | Review, approve, immutable versions |
 | Frontend automated tests | Missing | 0% | Test runner + coverage for critical flows |
 | Ops (jobs, storage, deploy) | Missing | 10% | Job runner, file store, OCR, deploy config |
 
-**Overall (product MVP toward regulated SOP+CKM):** roughly **~40%** foundation in
-place (platform, companies, documents, early knowledge); **~60%** still to build
-(full CKM productization, retrieval UX, entire SOP lifecycle).
+**Overall (product MVP toward regulated SOP+CKM):** roughly **~48%** foundation in
+place (platform, companies, documents, CKM review loop); **~52%** still to build
+(retrieval UX, entire SOP lifecycle, ops).
 
 ### Already solid (do not rebuild)
 
 - App platform: FastAPI + React/Vite, company isolation pattern, JWT login
 - Document pipeline: PDF/DOCX extract → chunk → persist (optional embeddings)
-- Early knowledge: extract / list / edit / confirm / reject APIs
+- CKM review loop: onboarding → proposed KOs; document extract → proposed;
+  confirm / edit / reject with provenance, history and company isolation
 - Local AI plumbing: Ollama / OpenAI-compatible adapters
 
 ### Still the bulk of the product
 
-- End-to-end CKM as a managed, auditable knowledge base in the UI
+- Dedicated Knowledge / CKM product route (beyond company-detail panel)
 - Public retrieval + grounded SOP generation
 - Full six-step SOP wizard, approval gate, version history
 - Background processing, OCR, durable source files
@@ -54,6 +55,10 @@ place (platform, companies, documents, early knowledge); **~60%** still to build
 - JWT login/registration/current-user lookup and protected routes.
 - FastAPI clients for companies, authentication, documents and knowledge.
 - Company list/search/create/edit/delete/detail, document interaction and stats.
+- Company Documents/SOP list: permanent delete with confirmation and verified-
+  dependency blocked modal; list/count/CKM refresh without full page reload.
+- Company Profile header: owner-gated permanent company delete (3-dot menu +
+  typed-name confirmation); list selection updates without reload.
 - Company onboarding UI with persisted profile answers, idempotent create,
   staged document/template upload, local draft restore.
 - SOP wizard **step 01** (project initialization) implemented.
@@ -62,20 +67,41 @@ place (platform, companies, documents, early knowledge); **~60%** still to build
 
 ### Backend and data
 
-- FastAPI app factory, injected configuration, middleware, request IDs,
-  logging, security headers, CORS and typed errors.
+- FastAPI app factory, injected configuration, middleware, request IDs
+  (`req_…`), structured console/JSON logging (HTTP, routing, embeddings,
+  retrieval, ingestion, CKM), security headers, CORS and typed errors.
 - PostgreSQL via SQLAlchemy and Alembic migrations; pgvector for embeddings.
 - JWT auth, login rate limiting and repository-scoped user/company access.
-- Company CRUD and PDF/DOCX upload, extraction, scanned-document detection,
-  structure-aware chunking and document/chunk persistence.
-- Local LLM abstraction for Ollama and OpenAI-compatible local runtimes.
+- Company CRUD and PDF/DOCX upload, layout-aware extraction (DOCX multi-signal,
+  Docling-or-pypdf PDF), digital/mixed/scanned classification, pluggable OCR
+  provider interface, structure normalization, extraction QA gate, structure-
+  aware chunking and document/chunk persistence.
+- Tenant-scoped document DELETE: cancels in-flight ingestion, clears pgvector
+  embeddings then chunks, strips multi-source proposed CKM evidence, deletes
+  single-source proposed/rejected document-derived KOs, blocks verified/
+  superseded dependencies with structured 409, syncs `sop_count`, structured
+  delete audit events (`document_delete_*`).
+- Company DELETE (owner role only): cancels company document ops, deletes all
+  company-owned documents/chunks/embeddings, all CKM objects+history (verified
+  included), onboarding/regulations/access rows; structured `company_delete_*`
+  logs; does not delete the user account or other tenants.
+- Local LLM abstraction for Ollama and OpenAI-compatible local runtimes, with
+  automatic AI routing (`AI_ROUTING_MODE=auto|remote|fallback`): remote LLM/
+  embeddings when healthy; `fallback` forces Gemini LLM + local Nomic 768-d
+  embeddings without the auto-mode compatibility gate; auto mode keeps the
+  compat self-test before remote→local failover. `POST .../documents/{id}/
+  embeddings` retries NULL vectors on existing chunks.
 - Optional embedding during ingestion (off unless AI is enabled/configured).
 - Company-prefiltered pgvector **retrieval infrastructure** (service layer)
   that preserves tier and source location.
-- `KnowledgeObject` model plus company-scoped APIs:
-  extract from chunks, list, edit label, confirm, reject, cancel extract op.
-- Backend tests for auth, companies, tenant isolation, documents, processing
-  and knowledge-related coverage where present.
+- `KnowledgeObject` model plus company-scoped APIs: extract from chunks,
+  propose from onboarding, filtered list, history, edit, confirm, reject.
+- Provenance `source_kind`: onboarding | uploaded_document | human_created |
+  ai_extracted; append-only `knowledge_object_history`; verified edits
+  supersede without destroying evidence.
+- Company create/update with onboarding auto-proposes Knowledge Objects.
+- Backend tests for auth, companies, tenant isolation, documents, processing,
+  onboarding→KO, confirm/edit/reject audit and filters.
 
 ### Repo / tooling (environment)
 
@@ -89,20 +115,19 @@ place (platform, companies, documents, early knowledge); **~60%** still to build
 - **Retrieval:** infrastructure exists; **no registered public retrieval/search
   API** and no end-to-end retrieval UI.
 - **Embeddings:** require `AI_FEATURES_ENABLED` and a configured local endpoint.
-- **Knowledge / CKM:** extract + human confirm/reject exist; full
-  provenance-complete review UX, CKM management product and tier presentation
-  in all flows are incomplete. Onboarding is **not** yet a complete
-  CKM-building workflow (no automatic KO extraction wired as the onboarding
-  outcome).
+- **Knowledge / CKM:** onboarding→proposed KOs, document extract, confirm /
+  edit / reject, provenance kinds, history API and company-detail review UI
+  exist. Dedicated `/knowledge` route is still a placeholder; history is API-
+  first (panel shows confirmation metadata, not a full timeline UI).
 - **SOP wizard:** step 01 only; steps 02–06 are placeholders.
-- **Roles:** `UserCompanyAccess.role` is stored but does not yet gate actions.
+- **Roles:** `UserCompanyAccess.role` is stored; company permanent delete
+  requires `owner`. Other actions are not yet role-gated.
 
 ---
 
 ## Not yet implemented
 
-- Full CKM product: managed knowledge base UI, complete verification audit
-  trail presentation, tier-aware authoring surfaces.
+- Dedicated CKM / Knowledge product page (beyond company-detail panel).
 - Registered retrieval API and retrieval/assistant UI.
 - SOP backend: Blueprint, Knowledge Mapping, grounded generation pipeline.
 - SOP review, approval and immutable version lifecycle.
@@ -118,7 +143,10 @@ place (platform, companies, documents, early knowledge); **~60%** still to build
 - Uploaded source bytes are not retained after parsing.
 - Parsing/ingestion currently runs during the upload request (no job queue).
 - Token revocation/refresh is not implemented.
-- OCR need is detected and surfaced, but OCR is not integrated.
+- OCR need is detected and classified (digital/mixed/scanned); a pluggable OCR
+  provider interface exists (`NullOcrProvider` by default). Production engines
+  (Docling OCR, Tesseract/ocrmypdf) are not bundled.
+- Docling is optional for layout-aware PDF; pypdf remains the default fallback.
 - Deployment must settle local models, embedding dimensions, file storage and
   background jobs.
 - Frontend automated tests are not configured; use build, lint and browser QA.
@@ -142,4 +170,4 @@ place (platform, companies, documents, early knowledge); **~60%** still to build
 3. SOP wizard steps 02+ only against approved designs; no invented screens.
 4. Background jobs + durable files before heavy ingestion/OCR work.
 
-_Last reconciled with the repository: 2026-09-17._
+_Last reconciled with the repository: 2026-09-18._

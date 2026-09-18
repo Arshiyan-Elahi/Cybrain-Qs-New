@@ -157,6 +157,39 @@ def list_chunks(
     return documents.chunks(current_user.id, company_id, document_id)
 
 
+@router.post(
+    "/documents/{document_id}/embeddings",
+    response_model=DocumentDetail,
+    status_code=status.HTTP_200_OK,
+)
+def retry_document_embeddings(
+    company_id: uuid.UUID,
+    document_id: uuid.UUID,
+    companies: CompanySvc,
+    documents: DocumentSvc,
+    ingestion: IngestionSvc,
+    current_user: CurrentUser,
+    settings: AppSettings,
+):
+    """
+    Resume embedding for a document whose semantic chunks already exist.
+
+    Does not re-upload or re-parse. Fills NULL embeddings only.
+    """
+    companies.get(current_user.id, company_id)
+    document = documents.get(current_user.id, company_id, document_id)
+    if not settings.ai_features_enabled:
+        from app.core.errors import ServiceUnavailableError
+
+        raise ServiceUnavailableError(
+            "Embeddings require AI features to be enabled.",
+            details={"reason": "ai_features_disabled"},
+        )
+    ingestion.embed_missing(company_id=company_id, document_id=document.id)
+    documents.sync_company_count(company_id)
+    return _detail(documents, documents.get(current_user.id, company_id, document_id))
+
+
 @router.delete("/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_document(
     company_id: uuid.UUID,

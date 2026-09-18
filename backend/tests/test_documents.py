@@ -3,6 +3,8 @@ import io
 import docx
 import pytest
 from datetime import UTC, datetime
+import uuid
+
 from sqlalchemy import select
 
 from app.core.config import Settings
@@ -166,10 +168,10 @@ class TestDocumentDeletion:
         keep = upload(client, company["id"], auth_headers, "keep-me.docx").json()
         chunk = db_session.scalar(select(DocumentChunk).where(DocumentChunk.document_id == target["id"]))
         chunk.embedding = [0.0] * 768
-        access = db_session.scalar(select(UserCompanyAccess).where(UserCompanyAccess.company_id == company["id"]))
         db_session.add(KnowledgeObject(
             company_id=company["id"], type="terminology", tier=KnowledgeTier.COMPANY,
             status=KnowledgeStatus.PROPOSED, label="Delete with source", payload={},
+            source_kind="uploaded_document",
             source_document_id=target["id"], source_chunk_id=chunk.id,
             source_location=chunk.location, extraction_method="test",
             extracted_at=datetime.now(UTC),
@@ -180,9 +182,71 @@ class TestDocumentDeletion:
         assert response.status_code == 204
         assert db_session.get(Document, target["id"]) is None
         assert db_session.scalar(select(DocumentChunk.id).where(DocumentChunk.document_id == target["id"])) is None
+        assert db_session.scalar(
+            select(DocumentChunk.id).where(
+                DocumentChunk.document_id == target["id"],
+                DocumentChunk.embedding.is_not(None),
+            )
+        ) is None
         assert db_session.scalar(select(KnowledgeObject.id).where(KnowledgeObject.source_document_id == target["id"])) is None
         assert db_session.get(Document, keep["id"]) is not None
         assert client.delete(f"/api/v1/companies/{company['id']}/documents/{target['id']}", headers=auth_headers).status_code == 204
+
+    def test_multi_source_proposed_survives_with_evidence_stripped(
+        self, client, db_session, auth_headers, company
+    ):
+        doc_a = upload(client, company["id"], auth_headers, "source-a.docx").json()
+        doc_b = upload(client, company["id"], auth_headers, "source-b.docx").json()
+        chunk_a = db_session.scalar(select(DocumentChunk).where(DocumentChunk.document_id == doc_a["id"]))
+        chunk_b = db_session.scalar(select(DocumentChunk).where(DocumentChunk.document_id == doc_b["id"]))
+        ko = KnowledgeObject(
+            company_id=company["id"],
+            type="role",
+            tier=KnowledgeTier.COMPANY,
+            status=KnowledgeStatus.PROPOSED,
+            label="Shared QA role",
+            payload={
+                "evidence": [
+                    {
+                        "documentId": doc_a["id"],
+                        "documentName": doc_a["filename"],
+                        "chunkId": str(chunk_a.id),
+                        "section": ["1. Purpose"],
+                        "snippet": "from A",
+                    },
+                    {
+                        "documentId": doc_b["id"],
+                        "documentName": doc_b["filename"],
+                        "chunkId": str(chunk_b.id),
+                        "section": ["2. Roles"],
+                        "snippet": "from B",
+                    },
+                ],
+                "analysisHashes": {doc_a["id"]: "hash-a", doc_b["id"]: "hash-b"},
+            },
+            source_kind="ai_extracted",
+            source_document_id=doc_a["id"],
+            source_chunk_id=chunk_a.id,
+            source_location=chunk_a.location,
+            extraction_method="test",
+            extracted_at=datetime.now(UTC),
+        )
+        db_session.add(ko)
+        db_session.flush()
+        ko_id = ko.id
+
+        assert client.delete(
+            f"/api/v1/companies/{company['id']}/documents/{doc_a['id']}", headers=auth_headers
+        ).status_code == 204
+
+        surviving = db_session.get(KnowledgeObject, ko_id)
+        assert surviving is not None
+        assert surviving.source_document_id == uuid.UUID(doc_b["id"])
+        evidence = surviving.payload.get("evidence")
+        assert isinstance(evidence, list) and len(evidence) == 1
+        assert evidence[0]["documentId"] == doc_b["id"]
+        assert doc_a["id"] not in (surviving.payload.get("analysisHashes") or {})
+        assert db_session.get(Document, doc_b["id"]) is not None
 
     def test_verified_provenance_blocks_delete(self, client, db_session, auth_headers, company):
         target = upload(client, company["id"], auth_headers, "verified-source.docx").json()
@@ -191,6 +255,7 @@ class TestDocumentDeletion:
         db_session.add(KnowledgeObject(
             company_id=company["id"], type="business_rule", tier=KnowledgeTier.COMPANY,
             status=KnowledgeStatus.VERIFIED, label="Verified", payload={},
+            source_kind="uploaded_document",
             source_document_id=target["id"], source_chunk_id=chunk.id,
             source_location=chunk.location, extraction_method="test",
             extracted_at=datetime.now(UTC), verified_by=access.user_id, verified_at=datetime.now(UTC),
@@ -202,6 +267,99 @@ class TestDocumentDeletion:
         assert "verified company knowledge" in body["message"]
         assert body["details"]["verifiedDependencyCount"] == 1
         assert body["details"]["reason"] == "verified_knowledge_dependency"
+        assert db_session.get(Document, uuid.UUID(target["id"])) is not None
+        assert client.get(
+            f"/api/v1/companies/{company['id']}/documents/{target['id']}",
+            headers=auth_headers,
+        ).status_code == 200
+
+    def test_cross_company_delete_denied(self, client, auth_headers, company, user_factory):
+        target = upload(client, company["id"], auth_headers, "tenant-a.docx").json()
+        other = user_factory()
+        # Other user has no access → same 404 surface as missing company docs.
+        assert (
+            client.delete(
+                f"/api/v1/companies/{company['id']}/documents/{target['id']}",
+                headers=other,
+            ).status_code
+            == 404
+        )
+        assert client.get(
+            f"/api/v1/companies/{company['id']}/documents/{target['id']}",
+            headers=auth_headers,
+        ).status_code == 200
+
+    def test_delete_does_not_affect_other_company_data(
+        self, client, db_session, auth_headers, company
+    ):
+        other_company = client.post(
+            "/api/v1/companies",
+            headers=auth_headers,
+            json={
+                "name": "Other Co",
+                "industryKey": "pharma",
+                "locationKey": "vienna-at",
+                "regulationIds": ["eu-gmp"],
+            },
+        ).json()
+        doc_a = upload(client, company["id"], auth_headers, "company-a.docx").json()
+        doc_b = upload(client, other_company["id"], auth_headers, "company-b.docx").json()
+        chunk_b = db_session.scalar(
+            select(DocumentChunk).where(DocumentChunk.document_id == doc_b["id"])
+        )
+        chunk_b.embedding = [0.1] * 768
+        db_session.add(
+            KnowledgeObject(
+                company_id=other_company["id"],
+                type="terminology",
+                tier=KnowledgeTier.COMPANY,
+                status=KnowledgeStatus.PROPOSED,
+                label="Other company KO",
+                payload={},
+                source_kind="uploaded_document",
+                source_document_id=doc_b["id"],
+                source_chunk_id=chunk_b.id,
+                source_location=chunk_b.location,
+                extraction_method="test",
+                extracted_at=datetime.now(UTC),
+            )
+        )
+        db_session.flush()
+
+        assert client.delete(
+            f"/api/v1/companies/{company['id']}/documents/{doc_a['id']}",
+            headers=auth_headers,
+        ).status_code == 204
+        assert db_session.get(Document, doc_b["id"]) is not None
+        assert (
+            db_session.scalar(
+                select(DocumentChunk.id).where(DocumentChunk.document_id == doc_b["id"])
+            )
+            is not None
+        )
+        assert (
+            db_session.scalar(
+                select(KnowledgeObject.id).where(
+                    KnowledgeObject.source_document_id == doc_b["id"]
+                )
+            )
+            is not None
+        )
+
+    def test_delete_cancels_in_flight_operation(self, client, auth_headers, company):
+        from app.modules.documents.cancellation import operations
+        import uuid as uuid_mod
+
+        target = upload(client, company["id"], auth_headers, "cancel-me.docx").json()
+        op_id = uuid_mod.uuid4()
+        operations.bind_document(op_id, uuid_mod.UUID(target["id"]))
+        assert operations.state(op_id).document_id is not None
+        assert client.delete(
+            f"/api/v1/companies/{company['id']}/documents/{target['id']}",
+            headers=auth_headers,
+        ).status_code == 204
+        # Operation entry is removed after cancel_document.
+        assert op_id not in operations._states
 
     def test_other_user_cannot_read(self, client, company, uploaded, user_factory):
         other = user_factory()

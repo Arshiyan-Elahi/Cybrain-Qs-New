@@ -1,17 +1,28 @@
 """
-Structure-based chunking.
+Structure-based chunking over normalized / extracted blocks.
 
 Chunks follow section boundaries rather than a fixed character count, so a
 chunk never splits a table or half a procedure. Every chunk carries the heading
-path it came from, which is what lets retrieval report where a fact lives.
+path it came from. Non-semantic furniture is retained for audit but flagged so
+embeddings / CKM can exclude it.
 """
 
-from dataclasses import dataclass, field
+from __future__ import annotations
+
 import hashlib
+from dataclasses import dataclass, field
 
 from app.processing.extractor import ExtractedBlock, ExtractedDocument
+from app.processing.schema import NormalizedDocument
 
 DEFAULT_MAX_CHARS = 1200
+
+_ATOMIC_KINDS = frozenset(
+    {"table", "approval_signature", "revision_history"}
+)
+_NON_EMBED_KINDS = frozenset(
+    {"header_footer", "document_metadata", "approval_signature"}
+)
 
 
 @dataclass
@@ -53,8 +64,13 @@ def _flush(
     if not buffer:
         return None
     pages = [b.page for b in buffer if b.page is not None]
-    path = _heading_path(stack)
-    semantic = all(block.semantic for block in buffer)
+    # Prefer paths already assigned by the normalizer when present.
+    path = next((list(b.heading_path) for b in buffer if b.heading_path), None)
+    if path is None:
+        path = _heading_path(stack)
+    semantic = all(block.semantic for block in buffer) and not any(
+        block.kind in _NON_EMBED_KINDS for block in buffer
+    )
     section_key = "\n".join(path) if path else "administrative"
     return Chunk(
         text="\n".join(b.text for b in buffer).strip(),
@@ -63,18 +79,33 @@ def _flush(
         page_start=min(pages) if pages else None,
         page_end=max(pages) if pages else None,
         section_id=hashlib.sha1(section_key.encode()).hexdigest()[:16],
-        blocks=[{"type": b.kind, "text": b.text, "structured": b.structured} for b in buffer],
+        blocks=[
+            {
+                "type": b.kind,
+                "text": b.text,
+                "structured": b.structured,
+                "id": b.block_id,
+            }
+            for b in buffer
+        ],
         is_semantic=semantic,
     )
 
 
 def chunk_document(
-    document: ExtractedDocument, max_chars: int = DEFAULT_MAX_CHARS
+    document: ExtractedDocument | NormalizedDocument, max_chars: int = DEFAULT_MAX_CHARS
 ) -> list[Chunk]:
+    if isinstance(document, NormalizedDocument):
+        from app.processing.extractor import to_extracted
+
+        document = to_extracted(document)
+
     chunks: list[Chunk] = []
     stack: list[tuple[int, str]] = []
     buffer: list[ExtractedBlock] = []
     size = 0
+    # Avoid repeating the same heading text inside body chunks.
+    last_emitted_heading: str | None = None
 
     def flush() -> None:
         nonlocal buffer, size
@@ -84,25 +115,31 @@ def chunk_document(
         buffer, size = [], 0
 
     for block in document.blocks:
-        if block.kind == "heading":
-            # A new section always starts a new chunk.
+        if block.kind in ("heading", "appendix"):
             flush()
             level = block.level or 1
             while stack and stack[-1][0] >= level:
                 stack.pop()
+            # Skip duplicate consecutive identical headings.
+            if block.text == last_emitted_heading and stack and stack[-1][1] == block.text:
+                continue
             stack.append((level, block.text))
+            last_emitted_heading = block.text
             continue
 
-        # A table is atomic: never merged into an oversized chunk, never split.
-        if block.kind in ("table", "approval_signature"):
+        if block.kind in _ATOMIC_KINDS:
+            flush()
+            buffer = [block]
+            flush()
+            continue
+
+        if block.kind == "header_footer":
             flush()
             buffer = [block]
             flush()
             continue
 
         if size and size + len(block.text) > max_chars:
-            # Oversized section: split on a paragraph boundary, keeping the
-            # heading path so both halves stay locatable.
             flush()
 
         buffer.append(block)

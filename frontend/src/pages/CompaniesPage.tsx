@@ -27,7 +27,8 @@ export function CompaniesPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pendingSelectId, setPendingSelectId] = useState<string | null>(null);
 
-  const { companies, loading, error, refresh, upsertCompany } = useCompanies(query);
+  const { companies, loading, error, refresh, upsertCompany, removeCompany } = useCompanies(query);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     const state = (location.state ?? null) as CompaniesLocationState | null;
@@ -64,6 +65,14 @@ export function CompaniesPage() {
 
   const selectedCompany = companies.find((company) => company.id === selectedId) ?? null;
 
+  const handleCompanyDeleted = (company: Company) => {
+    const remaining = companies.filter((entry) => entry.id !== company.id);
+    removeCompany(company.id);
+    setSelectedId(remaining[0]?.id ?? null);
+    setDeleteSuccess(t('companyDetail.deleteCompanySuccess', { name: company.name }));
+    void refresh();
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -92,6 +101,12 @@ export function CompaniesPage() {
           </p>
         )}
 
+        {deleteSuccess && (
+          <p className={styles.success} role="status">
+            {deleteSuccess}
+          </p>
+        )}
+
         <div className={styles.columns}>
           <CompanyListPanel
             companies={companies}
@@ -99,12 +114,19 @@ export function CompaniesPage() {
             query={query}
             loading={loading}
             onQueryChange={setQuery}
-            onSelect={setSelectedId}
+            onSelect={(id) => {
+              setDeleteSuccess(null);
+              setSelectedId(id);
+            }}
             onCreate={() => navigate(ROUTES.companyCreate)}
           />
 
           {selectedCompany ? (
-            <CompanyDetailCard company={selectedCompany} onChanged={refresh} />
+            <CompanyDetailCard
+              company={selectedCompany}
+              onChanged={refresh}
+              onDeleted={handleCompanyDeleted}
+            />
           ) : (
             <div className={styles.detailPlaceholder}>
               {loading || pendingSelectId ? t('common.loading') : t('companyProfiles.noSelection')}

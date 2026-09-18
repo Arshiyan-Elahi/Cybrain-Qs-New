@@ -8,7 +8,7 @@ from app.modules.companies.service import CompanyService
 from app.modules.auth.models import UserCompanyAccess
 from app.integrations.llm.base import Completion
 from sqlalchemy import select
-from app.shared.enums import DocumentStatus, KnowledgeStatus, KnowledgeTier
+from app.shared.enums import DocumentStatus, KnowledgeSourceKind, KnowledgeStatus, KnowledgeTier
 
 
 def test_list_returns_company_scoped_knowledge(client, db_session, auth_headers, company):
@@ -30,6 +30,7 @@ def test_list_returns_company_scoped_knowledge(client, db_session, auth_headers,
         status=KnowledgeStatus.PROPOSED,
         label="QA Manager",
         payload={"preferred": "QA Manager"},
+        source_kind=KnowledgeSourceKind.UPLOADED_DOCUMENT,
         source_document_id=document.id,
         source_location="1. Responsibilities",
         extraction_method="test-fixture",
@@ -71,7 +72,8 @@ def test_confirm_edit_and_reject_are_explicit_human_actions(
     for label in ("Confirm me", "Reject me"):
         item = KnowledgeObject(company_id=company["id"], type="business_rule",
             tier=KnowledgeTier.COMPANY, status=KnowledgeStatus.PROPOSED, label=label,
-            payload={}, source_document_id=document.id, source_location="Rules",
+            payload={}, source_kind=KnowledgeSourceKind.UPLOADED_DOCUMENT,
+            source_document_id=document.id, source_location="Rules",
             extraction_method="test-fixture", extracted_at=datetime.now(UTC))
         db_session.add(item)
         items.append(item)
@@ -136,6 +138,12 @@ def test_extraction_uses_stored_chunks_and_keeps_provenance(db_session, company,
     }
     assert all(item.status == KnowledgeStatus.PROPOSED for item in objects)
     assert all(item.source_document_id == document.id and item.source_chunk_id == chunk.id for item in objects)
+    assert {item.source_kind for item in objects if item.extraction_method == "deterministic"} == {
+        KnowledgeSourceKind.UPLOADED_DOCUMENT
+    }
+    assert {item.source_kind for item in objects if item.extraction_method.startswith("local-llm")} == {
+        KnowledgeSourceKind.AI_EXTRACTED
+    }
     terminology = [item.label for item in objects if item.type == "terminology"]
     assert terminology == ["Good Manufacturing Practice (GMP)"]
     assert not {"NAME", "COMPANY", "II", "IV", "VI", "EU", "GMP-", "WI-LL-", "FRM-LL-"} & set(terminology)
@@ -151,3 +159,174 @@ def test_extraction_uses_stored_chunks_and_keeps_provenance(db_session, company,
     assert created_again == 0
     assert skipped_again == 1
     assert len(objects_again) == len(objects)
+
+def test_onboarding_creates_proposed_knowledge_with_provenance(client, auth_headers, db_session):
+    import uuid
+    from app.modules.knowledge.models import KnowledgeObject, KnowledgeObjectHistory
+    from app.shared.enums import KnowledgeSourceKind, KnowledgeStatus
+    from sqlalchemy import select
+
+    response = client.post(
+        "/api/v1/companies",
+        headers=auth_headers,
+        json={
+            "name": "CKM Onboard Co",
+            "industryKey": "pharma",
+            "locationKey": "de",
+            "primaryLanguageKey": "en",
+            "regulationIds": [],
+            "creationRequestId": str(uuid.uuid4()),
+            "onboarding": {
+                "startOptionId": "nothing",
+                "documentPathId": "continue-without",
+                "terminologyText": "batch record\nCAPA",
+                "rolesText": "QA Manager",
+                "processesText": "Deviation handling",
+                "businessRulesText": "No silent overwrites",
+                "formsText": "Change control form",
+                "relationshipsText": "SOP links to forms",
+                "bestPracticesText": "Cite sources",
+                "structurePreferenceId": "standard",
+                "documentStructureNotes": "Keep sections short",
+                "toneId": "neutral",
+                "formalityId": "formal",
+                "personId": "third",
+                "writingNotes": "Prefer clear verbs",
+                "aiAssistLevelId": "balanced",
+                "requireHumanVerification": True,
+                "qualityNotes": "Human gate required",
+                "preferExistingTerms": True,
+                "departmentsText": "QA",
+                "workflowNotes": "Two-step review",
+                "templatePreferenceId": "gmp-default",
+                "layoutNotes": "Numbered headings",
+                "intendedDocumentNames": [],
+                "intendedTemplateNames": [],
+            },
+        },
+    )
+    assert response.status_code == 201
+    company_id = response.json()["id"]
+    objects = list(db_session.scalars(select(KnowledgeObject).where(KnowledgeObject.company_id == company_id)).all())
+    assert len(objects) >= 8
+    assert all(item.status == KnowledgeStatus.PROPOSED for item in objects)
+    assert all(item.source_kind == KnowledgeSourceKind.ONBOARDING for item in objects)
+    assert all(item.source_document_id is None for item in objects)
+    assert all(item.extraction_method == "onboarding-profile" for item in objects)
+    labels = {item.label for item in objects}
+    assert "batch record" in labels
+    assert "QA Manager" in labels
+    history = list(db_session.scalars(select(KnowledgeObjectHistory).where(
+        KnowledgeObjectHistory.company_id == company_id)).all())
+    assert history
+    assert all(row.action == "proposed_created" for row in history)
+
+    again = client.post(f"/api/v1/companies/{company_id}/knowledge-objects/from-onboarding", headers=auth_headers)
+    assert again.status_code == 200
+    assert again.json()["created"] == 0
+    assert len(list(db_session.scalars(select(KnowledgeObject).where(KnowledgeObject.company_id == company_id)).all())) == len(objects)
+
+
+def test_list_filters_and_verified_edit_keeps_audit_history(client, db_session, auth_headers, company):
+    from app.modules.knowledge.models import KnowledgeObject, KnowledgeObjectHistory
+    from app.shared.enums import KnowledgeSourceKind, KnowledgeStatus, KnowledgeTier
+    from sqlalchemy import select
+
+    document = Document(
+        company_id=company["id"], filename="filter.docx", source_format="docx",
+        status=DocumentStatus.PROCESSED, page_count=1, byte_size=20, warnings=[],
+    )
+    db_session.add(document)
+    db_session.flush()
+    onboard = KnowledgeObject(
+        company_id=company["id"], type="terminology", tier=KnowledgeTier.COMPANY,
+        status=KnowledgeStatus.PROPOSED, label="Onboard term", payload={"canonicalKey": "onboarding:terminology_text:onboard term"},
+        source_kind=KnowledgeSourceKind.ONBOARDING, source_document_id=None,
+        source_location="onboarding.terminology_text", extraction_method="onboarding-profile",
+        extracted_at=datetime.now(UTC),
+    )
+    doc_item = KnowledgeObject(
+        company_id=company["id"], type="business_rule", tier=KnowledgeTier.COMPANY,
+        status=KnowledgeStatus.PROPOSED, label="Doc rule", payload={"evidence": [{"documentId": str(document.id), "documentName": "filter.docx"}]},
+        source_kind=KnowledgeSourceKind.UPLOADED_DOCUMENT, source_document_id=document.id,
+        source_location="Rules", extraction_method="deterministic", extracted_at=datetime.now(UTC),
+    )
+    db_session.add_all([onboard, doc_item])
+    db_session.flush()
+
+    origin = client.get(
+        f"/api/v1/companies/{company['id']}/knowledge-objects?origin=onboarding",
+        headers=auth_headers,
+    )
+    assert origin.status_code == 200
+    assert origin.json()["total"] == 1
+    assert origin.json()["items"][0]["sourceKind"] == "onboarding"
+
+    by_type = client.get(
+        f"/api/v1/companies/{company['id']}/knowledge-objects?type=business_rule&source_kind=uploaded_document",
+        headers=auth_headers,
+    )
+    assert by_type.json()["total"] == 1
+
+    confirmed = client.post(
+        f"/api/v1/companies/{company['id']}/knowledge-objects/{doc_item.id}/confirm",
+        headers=auth_headers,
+    )
+    assert confirmed.status_code == 200
+    assert confirmed.json()["verifiedBy"] is not None
+    evidence_before = confirmed.json()["payload"]["evidence"]
+
+    edited = client.patch(
+        f"/api/v1/companies/{company['id']}/knowledge-objects/{doc_item.id}",
+        headers=auth_headers,
+        json={"label": "Doc rule revised"},
+    )
+    assert edited.status_code == 200
+    assert edited.json()["status"] == "proposed"
+    assert edited.json()["sourceKind"] == "human_created"
+    assert edited.json()["supersedesId"] == str(doc_item.id)
+    assert edited.json()["payload"]["evidence"] == evidence_before
+    assert edited.json()["version"] == 2
+
+    db_session.refresh(doc_item)
+    assert doc_item.status == KnowledgeStatus.SUPERSEDED
+
+    history = client.get(
+        f"/api/v1/companies/{company['id']}/knowledge-objects/{edited.json()['id']}/history",
+        headers=auth_headers,
+    )
+    assert history.status_code == 200
+    actions = {row["action"] for row in history.json()}
+    assert "confirmed" in actions or "superseded" in actions
+    assert "proposed_created" in actions
+    assert any(row["evidenceSnapshot"] for row in history.json())
+
+    rejected = client.post(
+        f"/api/v1/companies/{company['id']}/knowledge-objects/{onboard.id}/reject",
+        headers=auth_headers,
+    )
+    assert rejected.status_code == 200
+    assert rejected.json()["rejectedBy"] is not None
+    assert rejected.json()["rejectedAt"] is not None
+
+
+def test_knowledge_filters_preserve_company_isolation_on_history(client, auth_headers, company, user_factory, db_session):
+    document = Document(
+        company_id=company["id"], filename="iso.docx", source_format="docx",
+        status=DocumentStatus.PROCESSED, page_count=1, byte_size=10, warnings=[],
+    )
+    db_session.add(document)
+    db_session.flush()
+    item = KnowledgeObject(
+        company_id=company["id"], type="role", tier=KnowledgeTier.COMPANY,
+        status=KnowledgeStatus.PROPOSED, label="Isolated", payload={},
+        source_kind=KnowledgeSourceKind.UPLOADED_DOCUMENT, source_document_id=document.id,
+        source_location="Roles", extraction_method="test-fixture", extracted_at=datetime.now(UTC),
+    )
+    db_session.add(item)
+    db_session.flush()
+    other = user_factory()
+    assert client.get(
+        f"/api/v1/companies/{company['id']}/knowledge-objects/{item.id}/history",
+        headers=other,
+    ).status_code == 404

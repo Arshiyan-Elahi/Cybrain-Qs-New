@@ -17,7 +17,7 @@ from app.modules.companies.models import (  # noqa: F401
     CompanyRegulation,
 )
 from app.modules.documents.models import Document, DocumentChunk  # noqa: F401
-from app.modules.knowledge.models import KnowledgeObject  # noqa: F401
+from app.modules.knowledge.models import KnowledgeObject, KnowledgeObjectHistory  # noqa: F401
 
 __all__ = [
     "Base",
@@ -27,6 +27,7 @@ __all__ = [
     "Document",
     "DocumentChunk",
     "KnowledgeObject",
+    "KnowledgeObjectHistory",
     "User",
     "UserCompanyAccess",
 ]
