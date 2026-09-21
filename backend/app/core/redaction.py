@@ -27,6 +27,13 @@ _SENSITIVE_KEY = re.compile(
 
 _REDACTED = "[REDACTED]"
 
+# Query-string secrets (Gemini uses ?key= on generateContent if the key is
+# passed as a param). Also scrub Google API keys that leak into free text.
+_QUERY_SECRET = re.compile(
+    r"(?i)([?&](?:key|api[_-]?key|access_token|refresh_token|client_secret|password|secret)=)[^&\s\"']+"
+)
+_GOOGLE_API_KEY = re.compile(r"AIza[0-9A-Za-z_-]{20,}")
+
 
 def is_sensitive_key(key: str) -> bool:
     if (key or "") in _SAFE_KEYS:
@@ -53,6 +60,8 @@ def redact_mapping(data: dict[str, Any]) -> dict[str, Any]:
 def sanitize_text(text: str, *, max_chars: int = 2000) -> str:
     """Truncate and scrub obvious secret-looking substrings from free text."""
     cleaned = text
+    cleaned = _QUERY_SECRET.sub(r"\1[REDACTED]", cleaned)
+    cleaned = _GOOGLE_API_KEY.sub(_REDACTED, cleaned)
     cleaned = re.sub(
         r"(?i)(authorization|api[_-]?key|bearer)\s*[:=]\s*\S+",
         r"\1=[REDACTED]",

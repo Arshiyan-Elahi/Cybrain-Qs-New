@@ -80,17 +80,29 @@ def test_hr_sop_ingest_persists_semantic_provenance(db_session, company, hr_byte
     ).all())
     semantic = [c for c in chunks if c.is_semantic]
     assert semantic
-    assert all(c.heading_path for c in semantic)
     assert not any(
         any(b.get("type") == "approval_signature" for b in (c.extra.get("blocks") or []))
         for c in semantic
+        if c.heading_path
     )
 
-    det = KnowledgeService._deterministic_candidates(semantic, filename, "test")
-    assert all("(no section)" not in src.location for *_rest, src in det)
-    labels = {label for _kind, label, *_rest in det}
-    text = "\n".join(c.text for c in semantic)
+    det = KnowledgeService._deterministic_candidates(chunks, filename, "test")
+    assert all(src is None or "(no section)" not in src.location for *_rest, src in det)
+    document_wide = [row for row in det if row[0] in ("document_structure", "writing_style")]
+    assert document_wide
+    assert all(src is None for *_rest, src in document_wide)
+    terms = {label: src for kind, label, _payload, _method, src in det if kind == "terminology"}
+    labels = set(terms)
+    text = "\n".join(c.text for c in chunks)
     if "QA" in text or "Quality Assurance" in text:
         assert "Quality Assurance (QA)" in labels
+        qa_src = terms["Quality Assurance (QA)"]
+        assert qa_src is not None
+        assert "REFERENCE" not in " ".join(qa_src.heading_path).upper()
+        assert "SOP-QA-003" not in qa_src.text or "Quality Assurance" in qa_src.text
     if "OJT" in text or "On-the-Job" in text:
         assert "On-the-Job Training (OJT)" in labels
+        ojt_src = terms["On-the-Job Training (OJT)"]
+        assert ojt_src is not None
+        heading = " / ".join(ojt_src.heading_path).lower()
+        assert "reference" not in heading

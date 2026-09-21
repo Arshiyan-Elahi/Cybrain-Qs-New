@@ -335,3 +335,87 @@ export interface ProjectInitializationForm {
   contextOptionIds: string[];
   additionalContext: string;
 }
+
+export type BlueprintGenerationStatus = 'grounded' | 'partial' | 'blocked';
+export type BlueprintStructureSource =
+  | 'verified_document_structure'
+  | 'uploaded_sop_structure'
+  | 'generic_fallback';
+
+export interface BlueprintEvidence {
+  kind: 'verified_knowledge' | 'source_chunk';
+  id: string;
+  label: string;
+  type: string | null;
+  tier: string;
+  status: string;
+  similarity: number | null;
+  sourceDocumentId: string | null;
+  sourceDocumentName: string | null;
+  sourceChunkId: string | null;
+  sourceLocation: string | null;
+  snippet: string | null;
+  verifiedBy: string | null;
+  verifiedAt: string | null;
+}
+
+export interface BlueprintGap {
+  field: string;
+  reason: string;
+  severity: 'required' | 'optional';
+}
+
+export interface BlueprintSection {
+  sectionKey: string;
+  heading: string;
+  objective: string;
+  knowledgeObjectIds: string[];
+  sourceChunkIds: string[];
+  regulationIds: string[];
+  evidence: BlueprintEvidence[];
+  gaps: BlueprintGap[];
+  generationStatus: BlueprintGenerationStatus;
+}
+
+export interface SopBlueprint {
+  title: string;
+  topic: string;
+  structureSource: BlueprintStructureSource;
+  structureSourceNote: string;
+  structureSourceDocumentId: string | null;
+  generationGuidance: Array<{
+    id: string;
+    type: string;
+    label: string;
+    tier: string;
+    status: string;
+  }>;
+  unmappedKnowledge: BlueprintEvidence[];
+  sections: BlueprintSection[];
+  companyRegulationIds: string[];
+  summary: {
+    grounded: number;
+    partial: number;
+    blocked: number;
+    gapCount: number;
+    verifiedKnowledgeMapped: number;
+    fallbackStructure: boolean;
+    verifiedPoolSize: number;
+  };
+  retrievalNotes: string[];
+}
+
+export interface SopProject {
+  id: string;
+  companyId: string;
+  title: string;
+  topic: string;
+  status: 'planning' | 'blueprint_ready' | 'generation_ready';
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  blueprintVersion: number;
+  contextOptionIds: string[];
+  additionalContext: string;
+  blueprint: SopBlueprint | null;
+}

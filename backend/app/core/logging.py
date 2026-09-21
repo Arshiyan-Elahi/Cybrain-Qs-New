@@ -63,6 +63,21 @@ class RequestIdFilter(logging.Filter):
         return True
 
 
+class SecretScrubFilter(logging.Filter):
+    """Rewrite log messages so httpx URLs cannot leak API keys."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        try:
+            rendered = record.getMessage()
+        except Exception:  # noqa: BLE001
+            return True
+        cleaned = sanitize_text(rendered, max_chars=8000)
+        if cleaned != rendered:
+            record.msg = cleaned
+            record.args = ()
+        return True
+
+
 def format_timestamp(dt: datetime | None = None) -> str:
     moment = dt or datetime.now(tz=_LOCAL_TZ)
     return moment.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3] + moment.strftime(" %z")
@@ -140,6 +155,7 @@ def configure_logging(
     use_json = as_json if as_json is not None else (log_format or "console").lower() == "json"
     handler = logging.StreamHandler(sys.stdout)
     handler.addFilter(RequestIdFilter())
+    handler.addFilter(SecretScrubFilter())
     handler.setFormatter(JsonFormatter() if use_json else ConsoleFormatter())
 
     root = logging.getLogger()

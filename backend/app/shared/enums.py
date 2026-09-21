@@ -64,3 +64,11 @@ class DocumentKind(StrEnum):
     GENERAL = "general"
     SOP = "sop"
     TEMPLATE = "template"
+
+
+class SopProjectStatus(StrEnum):
+    """SOP project before approval/versioning. No approved SOP is implied."""
+
+    PLANNING = "planning"
+    BLUEPRINT_READY = "blueprint_ready"
+    GENERATION_READY = "generation_ready"

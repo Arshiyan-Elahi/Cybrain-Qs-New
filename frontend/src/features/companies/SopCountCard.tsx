@@ -40,6 +40,7 @@ import {
   knowledgeDetails,
   objectMatchesDocument,
   objectMatchesOrigin,
+  applyKnowledgeMutation,
   verifiedDependencyCount,
   type StructureNode,
 } from './knowledgeGrouping';
@@ -52,6 +53,15 @@ interface SopCountCardProps {
 
 type UploadState = 'uploading' | 'extracting' | 'structuring' | 'processing' | 'embedding' | 'finalizing' | 'completed' | 'cancelling' | 'cancelled' | 'processed' | 'failed' | 'needs_ocr';
 type KnowledgeViewMode = 'byType' | 'bySop';
+
+function isPersistedKnowledgeObject(value: unknown): value is KnowledgeObject {
+  if (!value || typeof value !== 'object') return false;
+  const record = value as Record<string, unknown>;
+  return typeof record.id === 'string'
+    && typeof record.label === 'string'
+    && typeof record.companyId === 'string'
+    && typeof record.status === 'string';
+}
 
 interface UploadItem {
   key: string;
@@ -403,8 +413,8 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
     }
   }, [preview, previewQueue]);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoading(true);
     setLoadError(null);
     try {
       const [nextStats, page, knowledgeItems] = await Promise.all([
@@ -420,7 +430,7 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
     } catch (caught) {
       setLoadError(caught instanceof Error ? caught.message : t('common.requestFailed'));
     } finally {
-      setLoading(false);
+      if (!options?.silent) setLoading(false);
     }
   }, [companyId, t]);
 
@@ -619,8 +629,11 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
     setKnowledgeBusy(key);
     setKnowledgeError(null);
     try {
-      await action();
-      await refresh();
+      const result = await action();
+      await refresh({ silent: true });
+      if (isPersistedKnowledgeObject(result)) {
+        setKnowledge((current) => applyKnowledgeMutation(current, key, result));
+      }
     } catch (caught) {
       setKnowledgeError(caught instanceof Error ? caught.message : t('common.requestFailed'));
     } finally {

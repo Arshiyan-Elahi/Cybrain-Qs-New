@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 
 from app.core.dependencies import require_ai_ready
 from app.core.pagination import Page, Paging
@@ -72,6 +72,7 @@ def list_knowledge_objects(
     service: KnowledgeSvc,
     current_user: CurrentUser,
     paging: Paging,
+    response: Response,
     type: str | None = Query(default=None, max_length=32),
     status: str | None = Query(default=None, max_length=16),
     source_kind: str | None = Query(default=None, max_length=32),
@@ -91,6 +92,7 @@ def list_knowledge_objects(
         origin=origin,
         include_superseded=include_superseded,
     )
+    response.headers["Cache-Control"] = "no-store"
     return Page[KnowledgeObjectRead](
         items=[KnowledgeObjectRead.model_validate(item) for item in items],
         total=total,

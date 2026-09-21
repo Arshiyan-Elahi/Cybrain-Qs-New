@@ -14,6 +14,7 @@ from app.modules.companies.schemas import CompanyCreate, CompanyUpdate
 from app.modules.documents.cancellation import operations
 from app.modules.documents.models import Document, DocumentChunk
 from app.modules.knowledge.models import KnowledgeObject, KnowledgeObjectHistory
+from app.modules.sops.models import SopProject
 
 logger = logging.getLogger("app.companies.delete")
 
@@ -162,6 +163,8 @@ class CompanyService:
         )
 
         try:
+            self.db.execute(delete(SopProject).where(SopProject.company_id == company_id))
+            self.db.flush()
             # Knowledge first: source_document_id is RESTRICT on documents.
             self.db.execute(
                 delete(KnowledgeObjectHistory).where(

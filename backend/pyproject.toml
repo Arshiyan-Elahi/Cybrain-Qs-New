@@ -8,6 +8,7 @@ testpaths = ["tests"]
 addopts = "-q --strict-markers"
 markers = [
     "requires_llm: needs a running local LLM endpoint (deselect with -m 'not requires_llm')",
+    "requires_local_nomic: loads nomic-ai/nomic-embed-text-v1.5 via SentenceTransformers",
 ]
 
 [tool.ruff]

@@ -1,0 +1,86 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: var(--c-placeholder);
+}
+
+.meta,
+.section,
+.guidance {
+  padding: 20px 24px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+.note,
+.empty,
+.objective {
+  margin-top: 8px;
+  color: var(--c-placeholder);
+}
+
+.error {
+  color: var(--c-danger, #b42318);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 100%;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.heading {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.groupLabel {
+  margin-top: 14px;
+  font-weight: 600;
+}
+
+.section ul,
+.guidance ul {
+  margin-top: 8px;
+  padding-left: 18px;
+}
+
+.section li,
+.guidance li {
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1024px) {
+  .header,
+  .sectionHead {
+    flex-wrap: wrap;
+  }
+}

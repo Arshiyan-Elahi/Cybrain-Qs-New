@@ -17,11 +17,12 @@ planning, not formal metrics.
 | Documents upload + processing | Implemented | 82% | Durable file storage, production OCR engine wiring, background jobs |
 | Auth (JWT) | Implemented | 80% | Refresh/revocation; role enforcement |
 | Knowledge Objects API | Implemented | 85% | Dedicated `/knowledge` product page; richer history UI |
-| pgvector retrieval | Partial | 40% | Public retrieval API + end-to-end UI |
+| pgvector retrieval | Partial | 62% | Product retrieval UI; SOP generator as consumer |
+
 | Local LLM adapters | Implemented | 70% | Production model/embed-dim decisions |
 | CKM management product | Partial | 70% | Standalone CKM route; tier presentation polish |
-| SOP wizard | Partial | 15% | Steps 02–06, Blueprint, mapping, editor |
-| SOP backend + generation | Missing | 5% | Models, APIs, grounded draft pipeline |
+| SOP wizard | Partial | 35% | Steps 05–06, design-backed blueprint UI, editor |
+| SOP backend + generation | Partial | 25% | Grounded draft pipeline; approval/versioning |
 | SOP approval / versioning | Missing | 0% | Review, approve, immutable versions |
 | Frontend automated tests | Missing | 0% | Test runner + coverage for critical flows |
 | Ops (jobs, storage, deploy) | Missing | 10% | Job runner, file store, OCR, deploy config |
@@ -61,7 +62,8 @@ place (platform, companies, documents, CKM review loop); **~52%** still to build
   typed-name confirmation); list selection updates without reload.
 - Company onboarding UI with persisted profile answers, idempotent create,
   staged document/template upload, local draft restore.
-- SOP wizard **step 01** (project initialization) implemented.
+- SOP wizard **step 01** (project initialization) implemented; steps 02–04 show
+  a functional Blueprint review (not a design-PDF screen).
 - Placeholder routes for screens without an approved design (SOP library,
   workflows, knowledge, assistant, records, alerts, settings, help).
 
@@ -94,14 +96,20 @@ place (platform, companies, documents, CKM review loop); **~52%** still to build
 - Optional embedding during ingestion (off unless AI is enabled/configured).
 - Company-prefiltered pgvector **retrieval infrastructure** (service layer)
   that preserves tier and source location.
+- Verified CKM **generation-context** package: trusted Knowledge Objects
+  (`status=verified` only; proposed/rejected/superseded excluded), grouped by
+  type with provenance, plus semantic document chunks via `RetrievalService`.
+  Development preview: `POST /api/v1/companies/{id}/retrieval/preview`
+  (404 in production; does not draft SOP text).
 - `KnowledgeObject` model plus company-scoped APIs: extract from chunks,
   propose from onboarding, filtered list, history, edit, confirm, reject.
 - Provenance `source_kind`: onboarding | uploaded_document | human_created |
   ai_extracted; append-only `knowledge_object_history`; verified edits
   supersede without destroying evidence.
 - Company create/update with onboarding auto-proposes Knowledge Objects.
-- Backend tests for auth, companies, tenant isolation, documents, processing,
-  onboarding→KO, confirm/edit/reject audit and filters.
+- SOP **projects** persist title/topic/status/blueprint JSONB; company-scoped
+  APIs create a project, build/rebuild a Blueprint from verified CKM + chunks,
+  and mark `generation_ready`. No SOP prose is generated.
 
 ### Repo / tooling (environment)
 
@@ -112,14 +120,18 @@ place (platform, companies, documents, CKM review loop); **~52%** still to build
 
 ## Partially implemented
 
-- **Retrieval:** infrastructure exists; **no registered public retrieval/search
-  API** and no end-to-end retrieval UI.
+- **Retrieval:** company-prefiltered chunk `RetrievalService` plus verified-CKM
+  `GenerationContextService` and a non-production preview endpoint. No product
+  retrieval UI and no SOP generator consuming the package yet.
 - **Embeddings:** require `AI_FEATURES_ENABLED` and a configured local endpoint.
 - **Knowledge / CKM:** onboarding→proposed KOs, document extract, confirm /
   edit / reject, provenance kinds, history API and company-detail review UI
   exist. Dedicated `/knowledge` route is still a placeholder; history is API-
   first (panel shows confirmation metadata, not a full timeline UI).
-- **SOP wizard:** step 01 only; steps 02–06 are placeholders.
+- **SOP wizard:** step 01 designed; steps 02–04 show a functional Blueprint
+  review; steps 05–06 remain placeholders.
+- **SOP backend:** project + Blueprint mapping exist; grounded draft generation
+  does not.
 - **Roles:** `UserCompanyAccess.role` is stored; company permanent delete
   requires `owner`. Other actions are not yet role-gated.
 
@@ -128,8 +140,8 @@ place (platform, companies, documents, CKM review loop); **~52%** still to build
 ## Not yet implemented
 
 - Dedicated CKM / Knowledge product page (beyond company-detail panel).
-- Registered retrieval API and retrieval/assistant UI.
-- SOP backend: Blueprint, Knowledge Mapping, grounded generation pipeline.
+- Retrieval/assistant UI. SOP generation does not yet consume the context package.
+- SOP backend: grounded generation pipeline (Blueprint exists).
 - SOP review, approval and immutable version lifecycle.
 - Remaining SOP wizard steps and complete editor/library workflows.
 - Background job runner, durable source-file storage and OCR engine.

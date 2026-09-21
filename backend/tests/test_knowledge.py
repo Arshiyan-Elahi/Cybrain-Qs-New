@@ -137,7 +137,12 @@ def test_extraction_uses_stored_chunks_and_keeps_provenance(db_session, company,
         "terminology", "writing_style", "document_structure", "regulation", "role", "workflow", "business_rule"
     }
     assert all(item.status == KnowledgeStatus.PROPOSED for item in objects)
-    assert all(item.source_document_id == document.id and item.source_chunk_id == chunk.id for item in objects)
+    assert all(item.source_document_id == document.id for item in objects)
+    document_wide = [item for item in objects if item.type in ("document_structure", "writing_style")]
+    grounded = [item for item in objects if item.type not in ("document_structure", "writing_style")]
+    assert all(item.source_chunk_id is None and item.source_location == "document" for item in document_wide)
+    assert all(item.payload.get("scope") == "document" for item in document_wide)
+    assert all(item.source_chunk_id == chunk.id for item in grounded)
     assert {item.source_kind for item in objects if item.extraction_method == "deterministic"} == {
         KnowledgeSourceKind.UPLOADED_DOCUMENT
     }
@@ -159,6 +164,149 @@ def test_extraction_uses_stored_chunks_and_keeps_provenance(db_session, company,
     assert created_again == 0
     assert skipped_again == 1
     assert len(objects_again) == len(objects)
+
+
+class _GeminiWrappedProvider:
+    """Mimic Gemini JSON-mode wrapping plus hallucinated deterministic types."""
+
+    name = "routing"
+    chat_model = "qwen/qwen2.5-vl-7b"
+    embedding_model = "test-embedding"
+    embedding_dimensions = 768
+
+    def complete(self, messages, *, temperature=0.2, max_tokens=None):
+        import json
+
+        source_chunk_id = json.loads(messages[-1].content)[0]["id"]
+        return Completion(
+            text=json.dumps(
+                {
+                    "knowledgeObjects": [
+                        {
+                            "type": "role",
+                            "label": "QA approver",
+                            "sourceChunkId": source_chunk_id,
+                            "payload": {"evidence": "Follow EU GMP and Annex 11."},
+                        },
+                        {
+                            "type": "terminology",
+                            "label": "Annex 11",
+                            "sourceChunkId": source_chunk_id,
+                            "payload": {},
+                        },
+                        {
+                            "type": "unicorn",
+                            "label": "Invented object",
+                            "sourceChunkId": source_chunk_id,
+                            "payload": {"evidence": "not in the chunk at all"},
+                        },
+                    ]
+                }
+            ),
+            model="gemini-2.5-flash",
+            provider="gemini",
+        )
+
+
+class _MalformedGeminiProvider:
+    name = "routing"
+    chat_model = "qwen/qwen2.5-vl-7b"
+    embedding_model = "test-embedding"
+    embedding_dimensions = 768
+
+    def complete(self, messages, *, temperature=0.2, max_tokens=None):
+        return Completion(
+            text='{"type":"role","label":"truncated"',
+            model="gemini-2.5-flash",
+            provider="gemini",
+        )
+
+
+def _seed_extract_document(db_session, company):
+    access = db_session.scalar(select(UserCompanyAccess).where(UserCompanyAccess.company_id == company["id"]))
+    document = Document(
+        company_id=company["id"],
+        filename="source.docx",
+        source_format="docx",
+        status=DocumentStatus.PROCESSED,
+        page_count=1,
+        byte_size=50,
+        warnings=[],
+    )
+    db_session.add(document)
+    db_session.flush()
+    chunk = DocumentChunk(
+        document_id=document.id,
+        company_id=company["id"],
+        tier=KnowledgeTier.COMPANY,
+        chunk_order=0,
+        heading_path=["3. Procedure"],
+        text="Follow EU GMP and Annex 11.",
+    )
+    db_session.add(chunk)
+    db_session.flush()
+    service = KnowledgeService(db_session, CompanyService(db_session, CompanyRepository(db_session)))
+    return access, document, chunk, service
+
+
+def test_extraction_unwraps_gemini_json_and_logs_actual_provider(db_session, company, caplog):
+    import logging
+
+    access, document, chunk, service = _seed_extract_document(db_session, company)
+    caplog.set_level(logging.INFO, logger="app.knowledge")
+    created, skipped = service.extract_from_chunks(
+        access.user_id, document.company_id, _GeminiWrappedProvider()
+    )
+    objects = list(
+        db_session.scalars(
+            select(KnowledgeObject).where(KnowledgeObject.company_id == document.company_id)
+        ).all()
+    )
+    by_type = {item.type: item for item in objects}
+    assert skipped == 0
+    assert created == 4  # structure, style, terminology, role
+    assert "role" in by_type
+    assert by_type["role"].label == "QA approver"
+    assert by_type["role"].status == KnowledgeStatus.PROPOSED
+    assert by_type["role"].source_kind == KnowledgeSourceKind.AI_EXTRACTED
+    assert by_type["role"].source_chunk_id == chunk.id
+    assert by_type["role"].model_provider == "gemini"
+    assert by_type["role"].model_name == "gemini-2.5-flash"
+    assert "unicorn" not in by_type
+    assert not any(item.label == "Annex 11" for item in objects)
+    assert not any(item.label == "Invented object" for item in objects)
+    completed = [r for r in caplog.records if getattr(r, "event", None) == "ckm_extraction_completed"]
+    assert completed
+    extras = completed[-1].extra_fields
+    assert extras["provider"] == "gemini"
+    assert extras["model"] == "gemini-2.5-flash"
+    parsed = [r for r in caplog.records if getattr(r, "event", None) == "ckm_llm_parse"]
+    assert parsed
+    assert parsed[-1].extra_fields["unwrapped"] is True
+    assert parsed[-1].extra_fields["kept"] == 1
+
+
+def test_malformed_gemini_response_keeps_only_deterministic(db_session, company):
+    access, document, _chunk, service = _seed_extract_document(db_session, company)
+    created, skipped = service.extract_from_chunks(
+        access.user_id, document.company_id, _MalformedGeminiProvider()
+    )
+    objects = list(
+        db_session.scalars(
+            select(KnowledgeObject).where(KnowledgeObject.company_id == document.company_id)
+        ).all()
+    )
+    assert skipped == 0
+    assert created == 3
+    assert {item.type for item in objects} == {
+        "terminology",
+        "writing_style",
+        "document_structure",
+    }
+    assert all(item.extraction_method == "deterministic" for item in objects)
+    assert all(item.status == KnowledgeStatus.PROPOSED for item in objects)
+    assert all(item.model_provider is None for item in objects)
+
 
 def test_onboarding_creates_proposed_knowledge_with_provenance(client, auth_headers, db_session):
     import uuid

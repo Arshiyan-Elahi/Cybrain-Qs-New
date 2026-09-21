@@ -8,6 +8,39 @@ supersede instead.
 
 ---
 
+## ADR-0018 — SOP blueprint maps verified CKM before any prose
+
+**Status:** Accepted · 2026-09-21
+
+An SOP project stores a reviewable Blueprint (section outline, verified
+Knowledge Object mappings, supporting source chunks, and explicit gaps) before
+generation. Trusted facts are `status=verified` only. Document chunks remain
+`source_evidence` and never become verified company knowledge. Company
+`document_structure` outranks uploaded SOP headings; a generic outline is
+fallback and must be labelled. Mapping is deterministic (type + semantic rank);
+the LLM must not invent company facts. Generated SOP prose is out of scope.
+
+---
+
+## ADR-0017 — Verified-only CKM retrieval for SOP generation context
+
+**Status:** Accepted · 2026-09-21
+
+SOP generation context may use only Knowledge Objects with `status=verified`
+that belong to the requested company. Proposed, rejected and superseded objects
+are excluded from the trusted CKM pool. Current revisions are the verified rows;
+superseded ancestors stay out until (and unless) they are verified again.
+
+Document chunks keep the existing company-prefiltered semantic
+`RetrievalService` (Nomic 768-d). Knowledge ranking is query-time cosine over
+trusted KO text (lexical fallback if embeddings are unavailable). Hybrid /
+RRF / MMR is not used until there is evidence it is needed;
+`ChunkSearcher` and `KnowledgeRanker` protocols are the upgrade points.
+
+This layer returns a structured context package. It does not draft SOP text.
+
+---
+
 ## ADR-0010 — Company isolation via repository scoping; JWT bearer auth
 
 **Status:** Accepted · 2026-08-12 · resolves the "Tenant isolation" open question

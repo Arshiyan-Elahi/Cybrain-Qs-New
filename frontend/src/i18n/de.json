@@ -198,6 +198,37 @@
       "finish": "Abschließen",
       "notDesigned": "Für diesen Schritt liegt noch kein Design vor. Der Schritt wird ergänzt, sobald das Layout verfügbar ist."
     },
+    "blueprint": {
+      "title": "SOP-Bauplan",
+      "subtitle": "Prüfen Sie die geplanten Abschnitte, das bestätigte Wissen, die Quellenbelege und die Lücken, bevor SOP-Text erzeugt wird.",
+      "rebuild": "Bauplan neu aufbauen",
+      "building": "Bauplan wird erstellt…",
+      "needTitleAndCompany": "Geben Sie einen SOP-Titel ein und wählen Sie ein Unternehmen, bevor der Bauplan erstellt wird.",
+      "structureSource": "Strukturquelle",
+      "structure": {
+        "verified_document_structure": "Bestätigte Unternehmens-Dokumentstruktur",
+        "uploaded_sop_structure": "Gliederung aus hochgeladener SOP (kein bestätigtes CKM)",
+        "generic_fallback": "Generische Ersatzstruktur"
+      },
+      "summary": "{{grounded}} fundiert · {{partial}} teilweise · {{blocked}} blockiert · {{gaps}} Lücken · {{verified}} bestätigte Wissensobjekte zugeordnet",
+      "mappedKnowledge": "Bestätigtes Wissen",
+      "noVerifiedKnowledge": "Diesem Abschnitt sind keine bestätigten Wissensobjekte zugeordnet.",
+      "sourceEvidence": "Unterstützende Quellenabschnitte",
+      "noChunks": "Keine unterstützenden Quellenabschnitte zugeordnet.",
+      "regulations": "Regulatorische Referenzen",
+      "gaps": "Fehlendes Wissen",
+      "noGaps": "Für diesen Abschnitt sind keine Lücken erfasst.",
+      "guidance": "Hinweise für die spätere Erzeugung (keine SOP-Fakten)",
+      "status": {
+        "grounded": "Fundiert",
+        "partial": "Teilweise",
+        "blocked": "Blockiert"
+      },
+      "severity": {
+        "required": "Erforderlich",
+        "optional": "Optional"
+      }
+    },
     "steps": {
       "project-initialization": "Projektinitialisierung",
       "knowledge-selection": "Wissensauswahl",

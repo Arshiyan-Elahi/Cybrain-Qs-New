@@ -13,6 +13,8 @@ from app.core.logging import (
     company_id_var,
     get_logger,
     log_event,
+    logging_flags,
+    maybe_content,
     reset_llm_call_context,
     set_llm_call_context,
 )
@@ -22,29 +24,25 @@ from app.modules.companies.service import CompanyService
 from app.modules.documents.cancellation import check_cancelled
 from app.modules.documents.models import Document, DocumentChunk
 from app.modules.knowledge.models import KnowledgeObject, KnowledgeObjectHistory
+from app.modules.knowledge.semantic_extract import (
+    CKM_EXTRACT_PROMPT_VERSION,
+    CKM_EXTRACT_SYSTEM,
+    semantic_candidates,
+)
+from app.modules.knowledge.terminology import (
+    TERM_PATTERNS,
+    occurrence_count,
+    select_terminology_chunk,
+)
 from app.shared.enums import KnowledgeSourceKind, KnowledgeStatus, KnowledgeTier
 
 logger = get_logger("app.knowledge")
 
-SEMANTIC_TYPES = {
-    "regulation",
-    "role",
-    "responsibility",
-    "workflow",
-    "process",
-    "business_rule",
-    "form_or_record",
-    "relationship",
-}
-TERM_PATTERNS = {
-    "Standard Operating Procedure (SOP)": r"\b(?:Standard Operating Procedures?|SOPs?)\b",
-    "Work Instruction (WI)": r"\b(?:Work Instructions?|WIs?)\b",
-    "Quality Assurance (QA)": r"\b(?:Quality Assurance|QA)\b",
-    "Good Manufacturing Practice (GMP)": r"\b(?:Good Manufacturing Practices?|GMP)\b",
-    "Good Clinical Practice (GCP)": r"\b(?:Good Clinical Practice|GCP)\b",
-    "Quality Management System (QMS)": r"\b(?:Quality Management System|QMS)\b",
-    "On-the-Job Training (OJT)": r"\b(?:On-the-Job Training|On the Job Training|OJT)\b",
-}
+DOCUMENT_EXTRACTION_VERSION = 5
+DOCUMENT_SCOPE_LOCATION = "document"
+_DOCUMENT_EXTRACT_METHODS = frozenset(
+    {"deterministic", "local-llm", "local-llm-document"}
+)
 SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
 LINE_SPLIT_RE = re.compile(r"[\n;•]+|(?:,\s+)(?=[A-Z])")
 
@@ -508,6 +506,7 @@ class KnowledgeService:
             .all()
         )
         type_counts: Counter[str] = Counter()
+        last_completion = None
         for document_id, document_chunks in documents.items():
             check_cancelled(cancel_token)
             analysis_hash = self._analysis_hash(document_chunks)
@@ -517,15 +516,18 @@ class KnowledgeService:
                 for item in existing_items
                 if item.source_document_id == document_id
                 and item.status == KnowledgeStatus.PROPOSED
-                and item.extraction_method in ("deterministic", "local-llm", "local-llm-document")
-                and item.payload.get("extractionVersion") != 2
+                and item.extraction_method in _DOCUMENT_EXTRACT_METHODS
+                and item.payload.get("extractionVersion") != DOCUMENT_EXTRACTION_VERSION
             ]
             for item in legacy:
                 self.db.delete(item)
                 existing.pop((item.type, item.label.casefold()), None)
                 existing_items.remove(item)
             if any(
-                item.payload.get("analysisHashes", {}).get(document_key) == analysis_hash
+                item.source_document_id == document_id
+                and item.status == KnowledgeStatus.PROPOSED
+                and item.payload.get("extractionVersion") == DOCUMENT_EXTRACTION_VERSION
+                and item.payload.get("analysisHashes", {}).get(document_key) == analysis_hash
                 for item in existing_items
             ):
                 skipped += 1
@@ -539,30 +541,27 @@ class KnowledgeService:
             ]
             ctx_token = set_llm_call_context(
                 operation="ckm_extraction",
-                prompt_version="ckm_extract_v2",
+                prompt_version=CKM_EXTRACT_PROMPT_VERSION,
                 retrieved_chunk_ids=[str(c.id) for c in semantic_chunks[:20]],
             )
             try:
                 completion = llm.complete(
                     [
-                        ChatMessage(
-                            role="system",
-                            content=(
-                                "Extract supported SOP knowledge. Return only a JSON array of objects with "
-                                "type, label, sourceChunkId, payload. Types: regulation, role, responsibility, workflow, "
-                                "process, business_rule, form_or_record, relationship. Use only explicit supplied text; "
-                                "labels must be concise; omit unsupported items."
-                            ),
-                        ),
+                        ChatMessage(role="system", content=CKM_EXTRACT_SYSTEM),
                         ChatMessage(role="user", content=json.dumps(compact_chunks, separators=(",", ":"))),
                     ],
                     temperature=0.0,
-                    max_tokens=1200,
+                    max_tokens=8192,
                 )
             finally:
                 reset_llm_call_context(ctx_token)
             check_cancelled(cancel_token)
-            candidates.extend(self._semantic_candidates(completion.text, semantic_chunks, analysis_hash))
+            last_completion = completion
+            llm_rows, parse_diag = semantic_candidates(
+                completion.text, semantic_chunks, analysis_hash
+            )
+            self._log_llm_parse(completion, parse_diag)
+            candidates.extend(llm_rows)
             candidate_keys: set[tuple[str, str]] = set()
             for kind, label, payload, method, source_chunk in candidates:
                 candidate_key = (kind, label.casefold())
@@ -574,19 +573,35 @@ class KnowledgeService:
                     if method.startswith("local-llm")
                     else KnowledgeSourceKind.UPLOADED_DOCUMENT
                 )
-                evidence = {
-                    "documentId": str(document_id),
-                    "documentName": filenames[document_id],
-                    "section": source_chunk.heading_path,
-                    "snippet": source_chunk.text[:500],
-                    "chunkId": str(source_chunk.id),
-                }
+                if source_chunk is None:
+                    evidence = {
+                        "documentId": str(document_id),
+                        "documentName": filenames[document_id],
+                        "scope": "document",
+                    }
+                    chunk_id = None
+                    source_location = DOCUMENT_SCOPE_LOCATION
+                    tier = KnowledgeTier.COMPANY
+                else:
+                    evidence = {
+                        "documentId": str(document_id),
+                        "documentName": filenames[document_id],
+                        "section": source_chunk.heading_path,
+                        "snippet": source_chunk.text[:500],
+                        "chunkId": str(source_chunk.id),
+                    }
+                    chunk_id = source_chunk.id
+                    source_location = source_chunk.location
+                    tier = source_chunk.tier
                 prior = existing.get(candidate_key)
                 if prior is not None:
+                    if prior.status != KnowledgeStatus.PROPOSED:
+                        continue
                     evidences = list(prior.payload.get("evidence", []))
                     if not any(
                         entry.get("documentId") == str(document_id)
-                        and entry.get("chunkId") == str(source_chunk.id)
+                        and entry.get("chunkId") == (str(chunk_id) if chunk_id else None)
+                        and entry.get("scope") == evidence.get("scope")
                         for entry in evidences
                     ):
                         prior.payload = {
@@ -602,22 +617,22 @@ class KnowledgeService:
                     **payload,
                     "evidence": [evidence],
                     "analysisHashes": {document_key: analysis_hash},
-                    "extractionVersion": 2,
+                    "extractionVersion": DOCUMENT_EXTRACTION_VERSION,
                 }
                 pending = KnowledgeObject(
                     company_id=company_id,
                     type=kind,
-                    tier=source_chunk.tier,
+                    tier=tier,
                     status=KnowledgeStatus.PROPOSED,
                     label=label,
                     payload=payload,
                     source_kind=source_kind,
                     source_document_id=document_id,
-                    source_chunk_id=source_chunk.id,
-                    source_location=source_chunk.location,
+                    source_chunk_id=chunk_id,
+                    source_location=source_location,
                     extraction_method=method,
-                    model_name=completion.model if method.startswith("local-llm") else None,
-                    model_provider=completion.provider if method.startswith("local-llm") else None,
+                    model_name=last_completion.model if method.startswith("local-llm") and last_completion else None,
+                    model_provider=last_completion.provider if method.startswith("local-llm") and last_completion else None,
                     extracted_at=datetime.now(timezone.utc),
                 )
                 self.db.add(pending)
@@ -639,10 +654,42 @@ class KnowledgeService:
             type_counts=dict(type_counts),
             document_count=len(documents),
             latency_ms=int((time.perf_counter() - started) * 1000),
-            provider=getattr(llm, "name", None),
-            model=getattr(llm, "chat_model", None),
+            provider=(last_completion.provider if last_completion else getattr(llm, "name", None)),
+            model=(last_completion.model if last_completion else getattr(llm, "chat_model", None)),
         )
         return created, skipped
+
+    def _log_llm_parse(self, completion, parse_diag: dict) -> None:
+        from app.core.config import get_settings
+
+        flags = logging_flags()
+        settings = get_settings()
+        usage = completion.usage or {}
+        fields = {
+            "provider": completion.provider,
+            "model": completion.model,
+            "prompt_version": CKM_EXTRACT_PROMPT_VERSION,
+            "response_chars": parse_diag.get("response_chars"),
+            "json_root_type": parse_diag.get("json_root_type"),
+            "parse_ok": parse_diag.get("parse_ok"),
+            "parse_error": parse_diag.get("parse_error"),
+            "unwrapped": parse_diag.get("unwrapped"),
+            "repaired": parse_diag.get("repaired"),
+            "raw_item_count": parse_diag.get("raw_item_count"),
+            "kept": parse_diag.get("kept"),
+            "finish_reason": usage.get("finish_reason"),
+            "thought_parts": usage.get("thought_parts"),
+        }
+        dropped = parse_diag.get("dropped")
+        if isinstance(dropped, dict):
+            fields["dropped"] = {key: value for key, value in dropped.items() if value}
+        if settings.environment != "production" or flags.get("log_ai_content"):
+            fields["response_preview"] = maybe_content(
+                completion.text,
+                enabled=True,
+                max_chars=min(int(flags.get("log_ai_content_max_chars", 2000)), 500),
+            )
+        log_event(logger, "ckm_llm_parse", "CKM LLM response parsed", **fields)
 
     @staticmethod
     def _analysis_hash(chunks: list[DocumentChunk]) -> str:
@@ -650,11 +697,11 @@ class KnowledgeService:
         return hashlib.sha256(material.encode()).hexdigest()
 
     @staticmethod
-    def _deterministic_candidates(chunks: list[DocumentChunk], filename: str, analysis_hash: str):
-        first = next((chunk for chunk in chunks if chunk.is_semantic and chunk.heading_path), chunks[0])
+    def _deterministic_candidates(
+        chunks: list[DocumentChunk], filename: str, analysis_hash: str
+    ) -> list[tuple[str, str, dict, str, DocumentChunk | None]]:
         text = " ".join(c.text for c in chunks)
         sentences = [s for s in SENTENCE_RE.split(text) if s.strip()]
-        common: dict = {}
         unique_paths = []
         seen_paths = set()
         for chunk in chunks:
@@ -662,18 +709,18 @@ class KnowledgeService:
             if path and path not in seen_paths:
                 seen_paths.add(path)
                 unique_paths.append(list(path))
-        result = [
+        result: list[tuple[str, str, dict, str, DocumentChunk | None]] = [
             (
                 "document_structure",
                 f"{filename} structure",
                 {
-                    **common,
                     "headingPaths": unique_paths,
                     "headingCount": len(unique_paths),
                     "chunkCount": len(chunks),
+                    "scope": "document",
                 },
                 "deterministic",
-                first,
+                None,
             )
         ]
         modals = {word: len(re.findall(rf"\b{word}\b", text, re.I)) for word in ("shall", "must", "should", "may")}
@@ -682,49 +729,28 @@ class KnowledgeService:
                 "writing_style",
                 f"{filename} writing statistics",
                 {
-                    **common,
                     "sentenceCount": len(sentences),
                     "averageWordsPerSentence": round(
                         sum(len(s.split()) for s in sentences) / max(len(sentences), 1), 1
                     ),
                     "modalCounts": modals,
+                    "scope": "document",
                 },
                 "deterministic",
-                first,
+                None,
             )
         )
         for term, pattern in TERM_PATTERNS.items():
-            count = len(re.findall(pattern, text, re.I))
-            if count:
-                source = next(
-                    (chunk for chunk in chunks if chunk.heading_path and re.search(pattern, chunk.text, re.I)),
-                    first,
+            count = occurrence_count(text, pattern)
+            source = select_terminology_chunk(chunks, pattern)
+            if count and source is not None:
+                result.append(
+                    (
+                        "terminology",
+                        term,
+                        {"occurrenceCount": count},
+                        "deterministic",
+                        source,
+                    )
                 )
-                result.append(("terminology", term, {**common, "count": count}, "deterministic", source))
-        return result
-
-    @staticmethod
-    def _semantic_candidates(raw: str, chunks: list[DocumentChunk], analysis_hash: str):
-        cleaned = raw.strip()
-        if cleaned.startswith("```"):
-            cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", cleaned, flags=re.IGNORECASE)
-        try:
-            values = json.loads(cleaned)
-        except (TypeError, json.JSONDecodeError):
-            return []
-        result = []
-        by_id = {str(chunk.id): chunk for chunk in chunks}
-        for value in values if isinstance(values, list) else []:
-            if not isinstance(value, dict) or value.get("type") not in SEMANTIC_TYPES:
-                continue
-            label = str(value.get("label", "")).strip()[:500]
-            if label:
-                payload = value.get("payload") if isinstance(value.get("payload"), dict) else {}
-                source = by_id.get(str(value.get("sourceChunkId")))
-                if source is None or not source.heading_path:
-                    continue
-                evidence = str(payload.pop("evidence", "")).strip()
-                if evidence and evidence.casefold() not in source.text.casefold():
-                    continue
-                result.append((value["type"], label, payload, "local-llm-document", source))
         return result

@@ -77,6 +77,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     headers,
     body: formData ?? (body !== undefined ? JSON.stringify(body) : undefined),
     signal,
+    cache: 'no-store',
   });
 
   if (!response.ok) throw await toError(response);

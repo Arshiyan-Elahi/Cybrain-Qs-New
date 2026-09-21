@@ -92,6 +92,10 @@ def test_secrets_redacted():
     assert cleaned["safe"] == "ok"
     assert cleaned["nested"]["llm_api_key"] == "[REDACTED]"
     assert "secret" not in sanitize_text("Authorization: Bearer abcdef password=1")
+    url = "POST https://generativelanguage.googleapis.com/v1beta/models/x:generateContent?key=AIzaSySecretKeyValue1234567890abcd"
+    scrubbed = sanitize_text(url)
+    assert "AIzaSySecretKeyValue1234567890abcd" not in scrubbed
+    assert "key=[REDACTED]" in scrubbed
 
 
 def test_ai_content_gated(monkeypatch):

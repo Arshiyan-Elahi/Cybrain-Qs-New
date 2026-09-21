@@ -18,6 +18,7 @@ from app.modules.companies.models import (  # noqa: F401
 )
 from app.modules.documents.models import Document, DocumentChunk  # noqa: F401
 from app.modules.knowledge.models import KnowledgeObject, KnowledgeObjectHistory  # noqa: F401
+from app.modules.sops.models import SopProject  # noqa: F401
 
 __all__ = [
     "Base",
@@ -28,6 +29,7 @@ __all__ = [
     "DocumentChunk",
     "KnowledgeObject",
     "KnowledgeObjectHistory",
+    "SopProject",
     "User",
     "UserCompanyAccess",
 ]

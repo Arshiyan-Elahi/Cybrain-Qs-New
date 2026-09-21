@@ -56,7 +56,9 @@ class LocalNomicEmbedder:
                 logger.warning("Local embeddings unavailable: %s", exc)
                 return None
             try:
-                model = SentenceTransformer(self.model_id, trust_remote_code=True)
+                model = SentenceTransformer(
+                    self.model_id, **_sentence_transformer_kwargs(self.model_id)
+                )
                 _model_cache[self.model_id] = model
                 self._unavailable_reason = None
                 return model
@@ -92,6 +94,33 @@ class LocalNomicEmbedder:
         except ValueError as exc:
             raise invalid_response(self.name, str(exc)) from exc
         return self.profile.postprocess(vectors)
+
+
+def _native_nomic_bert_available() -> bool:
+    """True when transformers ships NomicBert (v5.5+) and Hub auto_map is stale."""
+    try:
+        from transformers.models.auto.modeling_auto import MODEL_MAPPING_NAMES
+    except Exception:  # noqa: BLE001 - optional stack, load path still has a fallback
+        return False
+    return MODEL_MAPPING_NAMES.get("nomic_bert") == "NomicBertModel"
+
+
+def _sentence_transformer_kwargs(model_id: str) -> dict[str, Any]:
+    """
+    Keep trust_remote_code=True for SentenceTransformer module loading.
+
+    nomic-embed-text-v1.5 config.auto_map still points at nomic-bert-2048 custom
+    code that calls PreTrainedModel.get_extended_attention_mask, removed in
+    transformers 5. When the native NomicBert architecture is registered, load
+    that instead of executing the Hub snapshot.
+    """
+    kwargs: dict[str, Any] = {"trust_remote_code": True}
+    if "nomic" in model_id.lower() and _native_nomic_bert_available():
+        native = {"trust_remote_code": False}
+        kwargs["model_kwargs"] = dict(native)
+        kwargs["config_kwargs"] = dict(native)
+        kwargs["processor_kwargs"] = dict(native)
+    return kwargs
 
 
 def clear_local_model_cache() -> None:

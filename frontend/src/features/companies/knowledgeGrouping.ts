@@ -68,13 +68,34 @@ export function evidenceSources(item: KnowledgeObject): KnowledgeEvidence[] {
 export function objectMatchesOrigin(item: KnowledgeObject, origin: string): boolean {
   if (origin === 'onboarding') return item.sourceKind === 'onboarding';
   if (origin === 'document') {
-    return item.sourceKind === 'uploaded_document' || item.sourceKind === 'ai_extracted';
+    return item.sourceKind === 'uploaded_document'
+      || item.sourceKind === 'ai_extracted'
+      || (item.sourceKind === 'human_created' && Boolean(item.sourceDocumentId));
   }
   return true;
 }
 
 export function objectMatchesDocument(item: KnowledgeObject, documentId: string): boolean {
   return evidenceSources(item).some((source) => source.documentId === documentId);
+}
+
+/** Merge a confirm/reject/edit response so a stale list GET cannot revert the action. */
+export function applyKnowledgeMutation(
+  items: KnowledgeObject[],
+  previousId: string,
+  result: KnowledgeObject,
+): KnowledgeObject[] {
+  const next = items.map((item) => {
+    if (item.id === previousId && result.supersedesId === previousId) {
+      return { ...item, status: 'superseded' as const };
+    }
+    if (item.id === result.id) return result;
+    return item;
+  });
+  if (!next.some((item) => item.id === result.id)) {
+    return [result, ...next];
+  }
+  return next;
 }
 
 export function verifiedDependencyCount(items: KnowledgeObject[], documentId: string): number {
@@ -122,7 +143,6 @@ export function knowledgeDetails(item: KnowledgeObject): string[] {
   for (const key of ['description', 'summary', 'value']) {
     if (typeof item.payload[key] === 'string') return [item.payload[key] as string];
   }
-  if (typeof item.payload.count === 'number') return [`Count: ${item.payload.count}`];
   return [];
 }
 

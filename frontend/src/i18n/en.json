@@ -198,6 +198,37 @@
       "finish": "Finish",
       "notDesigned": "No design is available for this step yet. It will be added as soon as the layout is available."
     },
+    "blueprint": {
+      "title": "SOP Blueprint",
+      "subtitle": "Review the planned sections, verified knowledge, source evidence and gaps before any SOP prose is generated.",
+      "rebuild": "Rebuild blueprint",
+      "building": "Building blueprint…",
+      "needTitleAndCompany": "Enter an SOP title and select a company before building the blueprint.",
+      "structureSource": "Structure source",
+      "structure": {
+        "verified_document_structure": "Verified company document structure",
+        "uploaded_sop_structure": "Uploaded SOP outline (not verified CKM)",
+        "generic_fallback": "Generic fallback structure"
+      },
+      "summary": "{{grounded}} grounded · {{partial}} partial · {{blocked}} blocked · {{gaps}} gaps · {{verified}} verified knowledge objects mapped",
+      "mappedKnowledge": "Verified knowledge",
+      "noVerifiedKnowledge": "No verified Knowledge Objects mapped to this section.",
+      "sourceEvidence": "Supporting source chunks",
+      "noChunks": "No supporting source chunks mapped.",
+      "regulations": "Regulatory references",
+      "gaps": "Missing knowledge",
+      "noGaps": "No gaps recorded for this section.",
+      "guidance": "Generation-level guidance (not SOP facts)",
+      "status": {
+        "grounded": "Grounded",
+        "partial": "Partial",
+        "blocked": "Blocked"
+      },
+      "severity": {
+        "required": "Required",
+        "optional": "Optional"
+      }
+    },
     "steps": {
       "project-initialization": "Project initialization",
       "knowledge-selection": "Knowledge selection",
