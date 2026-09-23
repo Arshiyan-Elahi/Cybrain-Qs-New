@@ -5,3 +5,65 @@
   flex-direction: column;
   gap: 24px;
 }
+
+.card,
+.advanced {
+  max-width: 760px;
+  padding: 20px 22px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+.card h2,
+.advanced h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.card p,
+.advancedLead {
+  margin: 8px 0 14px;
+  color: var(--c-text-soft);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.advanced summary {
+  cursor: pointer;
+  color: var(--c-brand);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.advanced h3 {
+  margin-top: 22px;
+}
+
+.linkList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  color: var(--c-text);
+  font-weight: 600;
+}
+
+.link:hover {
+  color: var(--c-brand);
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding: 28px 20px 36px;
+  }
+}

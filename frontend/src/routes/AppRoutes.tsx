@@ -5,32 +5,26 @@ import { ROUTES } from '../constants/navigation';
 import { CompaniesPage } from '../pages/CompaniesPage';
 import { CompanyOnboardingPage } from '../pages/CompanyOnboardingPage';
 import { CreateSopPage } from '../pages/CreateSopPage';
+import { KnowledgePage } from '../pages/KnowledgePage';
 import { LoginPage } from '../pages/LoginPage';
 import { SettingsPage } from '../pages/SettingsPage';
+import { SopsPage } from '../pages/SopsPage';
 import { PlaceholderPage } from '../pages/PlaceholderPage';
 
-/** Rail destinations that exist in the navigation but have no design yet. */
+/** Older destinations kept available from Settings. */
 const PLACEHOLDER_ROUTES = [
-  { path: ROUTES.sopLibrary, titleKey: 'placeholder.sopLibrary' },
   { path: ROUTES.workflows, titleKey: 'nav.workflows' },
-  { path: ROUTES.knowledge, titleKey: 'nav.knowledge' },
   { path: ROUTES.assistant, titleKey: 'nav.assistant' },
   { path: ROUTES.records, titleKey: 'nav.records' },
   { path: ROUTES.alerts, titleKey: 'nav.alerts' },
   { path: ROUTES.help, titleKey: 'nav.help' },
 ];
 
-/** Every screen except login sits behind authentication. */
-function Protected({
-  navigation,
-  children,
-}: {
-  navigation: 'sidebar' | 'rail';
-  children: React.ReactNode;
-}) {
+/** Every screen except login sits behind authentication and the labelled nav. */
+function Protected({ children }: { children: React.ReactNode }) {
   return (
     <RequireAuth>
-      <AppShell navigation={navigation}>{children}</AppShell>
+      <AppShell navigation="sidebar">{children}</AppShell>
     </RequireAuth>
   );
 }
@@ -45,7 +39,7 @@ export function AppRoutes() {
       <Route
         path={ROUTES.companies}
         element={
-          <Protected navigation="sidebar">
+          <Protected>
             <CompaniesPage />
           </Protected>
         }
@@ -54,8 +48,17 @@ export function AppRoutes() {
       <Route
         path={ROUTES.companyCreate}
         element={
-          <Protected navigation="rail">
+          <Protected>
             <CompanyOnboardingPage />
+          </Protected>
+        }
+      />
+
+      <Route
+        path={ROUTES.knowledge}
+        element={
+          <Protected>
+            <KnowledgePage />
           </Protected>
         }
       />
@@ -63,8 +66,17 @@ export function AppRoutes() {
       <Route
         path={ROUTES.sopCreate}
         element={
-          <Protected navigation="rail">
+          <Protected>
             <CreateSopPage />
+          </Protected>
+        }
+      />
+
+      <Route
+        path={ROUTES.sopLibrary}
+        element={
+          <Protected>
+            <SopsPage />
           </Protected>
         }
       />
@@ -72,7 +84,7 @@ export function AppRoutes() {
       <Route
         path={ROUTES.settings}
         element={
-          <Protected navigation="rail">
+          <Protected>
             <SettingsPage />
           </Protected>
         }
@@ -83,7 +95,7 @@ export function AppRoutes() {
           key={route.path}
           path={route.path}
           element={
-            <Protected navigation="rail">
+            <Protected>
               <PlaceholderPage titleKey={route.titleKey} />
             </Protected>
           }

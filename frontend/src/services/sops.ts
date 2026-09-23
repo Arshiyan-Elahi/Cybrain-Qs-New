@@ -26,3 +26,9 @@ export function buildSopBlueprint(companyId: string, projectId: string): Promise
     body: {},
   });
 }
+
+export function markSopGenerationReady(companyId: string, projectId: string): Promise<SopProject> {
+  return request<SopProject>(`/companies/${companyId}/sop-projects/${projectId}/ready`, {
+    method: 'POST',
+  });
+}

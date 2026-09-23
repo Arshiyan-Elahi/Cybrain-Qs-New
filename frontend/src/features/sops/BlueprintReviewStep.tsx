@@ -41,46 +41,49 @@ export function BlueprintReviewStep({
 
       {blueprint && (
         <>
-          <div className={styles.meta}>
-            <p>
-              <strong>{t('sop.blueprint.structureSource')}:</strong>{' '}
-              {t(`sop.blueprint.structure.${blueprint.structureSource}`)}
-            </p>
-            <p className={styles.note}>{blueprint.structureSourceNote}</p>
-            <p>
-              {t('sop.blueprint.summary', {
-                grounded: blueprint.summary.grounded,
-                partial: blueprint.summary.partial,
-                blocked: blueprint.summary.blocked,
-                gaps: blueprint.summary.gapCount,
-                verified: blueprint.summary.verifiedKnowledgeMapped,
-              })}
-            </p>
-            {blueprint.retrievalNotes.map((note) => (
-              <p key={note} className={styles.note}>
-                {note}
+          <p>
+            {t('sop.blueprint.summary', {
+              grounded: blueprint.summary.grounded,
+              partial: blueprint.summary.partial,
+              blocked: blueprint.summary.blocked,
+              gaps: blueprint.summary.gapCount,
+              verified: blueprint.summary.verifiedKnowledgeMapped,
+            })}
+          </p>
+
+          <details className={styles.advanced}>
+            <summary>{t('ux.advanced')}</summary>
+            <div className={styles.meta}>
+              <p>
+                <strong>{t('sop.blueprint.structureSource')}:</strong>{' '}
+                {t(`sop.blueprint.structure.${blueprint.structureSource}`)}
               </p>
-            ))}
-          </div>
+              <p className={styles.note}>{blueprint.structureSourceNote}</p>
+              {blueprint.retrievalNotes.map((note) => (
+                <p key={note} className={styles.note}>
+                  {note}
+                </p>
+              ))}
+            </div>
+            {blueprint.generationGuidance.length > 0 && (
+              <div className={styles.guidance}>
+                <h3>{t('sop.blueprint.guidance')}</h3>
+                <ul>
+                  {blueprint.generationGuidance.map((item) => (
+                    <li key={item.id}>
+                      {item.type}: {item.label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </details>
 
           <ol className={styles.sections}>
             {blueprint.sections.map((section) => (
               <SectionCard key={section.sectionKey} section={section} />
             ))}
           </ol>
-
-          {blueprint.generationGuidance.length > 0 && (
-            <div className={styles.guidance}>
-              <h3>{t('sop.blueprint.guidance')}</h3>
-              <ul>
-                {blueprint.generationGuidance.map((item) => (
-                  <li key={item.id}>
-                    {item.type}: {item.label}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </>
       )}
     </div>
@@ -108,29 +111,33 @@ function SectionCard({ section }: { section: BlueprintSection }) {
           {knowledge.map((row) => (
             <li key={row.id}>
               <strong>{row.label}</strong>
-              <span>
-                {' '}
-                ({row.type}, {row.tier}, {row.status}
-                {row.sourceLocation ? ` — ${row.sourceLocation}` : ''})
-              </span>
+              <details>
+                <summary>{t('ux.details')}</summary>
+                <span>
+                  {row.type}, {row.tier}, {row.status}
+                  {row.sourceLocation ? ` — ${row.sourceLocation}` : ''}
+                </span>
+              </details>
             </li>
           ))}
         </ul>
       )}
 
-      <p className={styles.groupLabel}>{t('sop.blueprint.sourceEvidence')}</p>
-      {chunks.length === 0 ? (
-        <p className={styles.empty}>{t('sop.blueprint.noChunks')}</p>
-      ) : (
-        <ul>
-          {chunks.map((row) => (
-            <li key={row.id}>
-              {row.sourceDocumentName} — {row.sourceLocation}
-              {row.snippet ? `: ${row.snippet}` : ''}
-            </li>
-          ))}
-        </ul>
-      )}
+      <details>
+        <summary>{t('sop.blueprint.sourceEvidence')}</summary>
+        {chunks.length === 0 ? (
+          <p className={styles.empty}>{t('sop.blueprint.noChunks')}</p>
+        ) : (
+          <ul>
+            {chunks.map((row) => (
+              <li key={row.id}>
+                {row.sourceDocumentName} — {row.sourceLocation}
+                {row.snippet ? `: ${row.snippet}` : ''}
+              </li>
+            ))}
+          </ul>
+        )}
+      </details>
 
       {section.regulationIds.length > 0 && (
         <p>

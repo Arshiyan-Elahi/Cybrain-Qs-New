@@ -33,3 +33,14 @@
   flex: none;
   color: var(--c-brand);
 }
+
+.details {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.details summary {
+  cursor: pointer;
+  color: var(--c-brand);
+  font-weight: 600;
+}

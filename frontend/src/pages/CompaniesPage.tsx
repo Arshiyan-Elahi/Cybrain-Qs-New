@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../components/common/Button';
 import { Icon } from '../components/common/Icon';
@@ -23,12 +23,18 @@ export function CompaniesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pendingSelectId, setPendingSelectId] = useState<string | null>(null);
 
   const { companies, loading, error, refresh, upsertCompany, removeCompany } = useCompanies(query);
   const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    const companyFromQuery = searchParams.get('company');
+    if (companyFromQuery) setPendingSelectId(companyFromQuery);
+  }, [searchParams]);
 
   useEffect(() => {
     const state = (location.state ?? null) as CompaniesLocationState | null;

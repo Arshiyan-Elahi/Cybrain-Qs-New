@@ -1,13 +1,11 @@
 import type { SopContextOption, WizardStep } from '../types';
 
-/** The six wizard steps, in the order drawn in the design. */
+/** Guided Create SOP steps for QA users (reuses project + blueprint APIs). */
 export const WIZARD_STEPS: WizardStep[] = [
-  { ordinal: '01', labelKey: 'sop.steps.project-initialization' },
-  { ordinal: '02', labelKey: 'sop.steps.knowledge-selection' },
-  { ordinal: '03', labelKey: 'sop.steps.blueprint-builder' },
-  { ordinal: '04', labelKey: 'sop.steps.knowledge-mapping' },
-  { ordinal: '05', labelKey: 'sop.steps.draft-generation' },
-  { ordinal: '06', labelKey: 'sop.steps.review-iteration' },
+  { ordinal: '01', labelKey: 'sop.steps.what-to-create' },
+  { ordinal: '02', labelKey: 'sop.steps.preparing' },
+  { ordinal: '03', labelKey: 'sop.steps.check-before' },
+  { ordinal: '04', labelKey: 'sop.steps.sop-draft' },
 ];
 
 /**
@@ -18,7 +16,7 @@ export const WIZARD_STEPS: WizardStep[] = [
  */
 export const SOP_CONTEXT_PRIMARY_COUNT = 3;
 
-/** "Why is this SOP required?" options, in the order shown. */
+/** "Why is this SOP required?" options — kept for Advanced / API compatibility. */
 export const SOP_CONTEXT_OPTIONS: SopContextOption[] = [
   { id: 'new-process', labelKey: 'sop.contextOptions.new-process' },
   { id: 'audit-finding', labelKey: 'sop.contextOptions.audit-finding' },

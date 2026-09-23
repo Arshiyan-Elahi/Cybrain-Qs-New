@@ -10,7 +10,7 @@ interface CkmStatusPanelProps {
   error?: string | null;
 }
 
-/** Live document/knowledge readiness summary for the selected company. */
+/** Plain readiness summary. Section and embedding counts stay under Details. */
 export function CkmStatusPanel({
   companyName,
   stats,
@@ -19,34 +19,39 @@ export function CkmStatusPanel({
 }: CkmStatusPanelProps) {
   const { t } = useTranslation();
 
-  const facts = stats
-    ? [
-        t('sop.ckm.documentsAnalysed', { value: stats.processedCount }),
-        t('sop.ckm.chunksAvailable', { value: stats.chunkCount }),
-        t('sop.ckm.embeddingsAvailable', { value: stats.embeddedChunkCount }),
-        t('sop.ckm.aiStatus', {
-          value: t(stats.aiFeaturesEnabled ? 'common.enabled' : 'common.disabled'),
-        }),
-      ]
-    : [
-        loading
-          ? t('common.loading')
-          : error
-            ? t('common.loadFailed', { message: error })
-            : t('sop.ckm.noData'),
-      ];
+  const summary = !stats
+    ? loading
+      ? t('common.loading')
+      : error
+        ? t('common.loadFailed', { message: error })
+        : t('sop.ckm.noData')
+    : stats.documentCount === 0
+      ? t('ux.ckm.noDocuments')
+      : t('ux.ckm.documentsReady', { value: stats.processedCount });
 
   return (
     <section className={styles.panel}>
-      <h4 className={styles.title}>{t('sop.ckm.title', { company: companyName })}</h4>
+      <h4 className={styles.title}>{t('ux.ckm.title', { company: companyName })}</h4>
       <ul className={styles.facts}>
-        {facts.map((fact) => (
-          <li key={fact} className={styles.fact}>
-            <Icon name="checkCircle" size={14} strokeWidth={1.8} className={styles.icon} />
-            <span>{fact}</span>
-          </li>
-        ))}
+        <li className={styles.fact}>
+          <Icon name="checkCircle" size={14} strokeWidth={1.8} className={styles.icon} />
+          <span>{summary}</span>
+        </li>
       </ul>
+      {stats && (
+        <details className={styles.details}>
+          <summary>{t('ux.details')}</summary>
+          <ul className={styles.facts}>
+            <li className={styles.fact}>{t('sop.ckm.chunksAvailable', { value: stats.chunkCount })}</li>
+            <li className={styles.fact}>{t('sop.ckm.embeddingsAvailable', { value: stats.embeddedChunkCount })}</li>
+            <li className={styles.fact}>
+              {t('sop.ckm.aiStatus', {
+                value: t(stats.aiFeaturesEnabled ? 'common.enabled' : 'common.disabled'),
+              })}
+            </li>
+          </ul>
+        </details>
+      )}
     </section>
   );
 }

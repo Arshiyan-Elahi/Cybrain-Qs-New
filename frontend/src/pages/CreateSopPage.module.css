@@ -33,6 +33,13 @@
   gap: 18px;
 }
 
+.saveMessage {
+  margin: 16px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1b6b3a;
+}
+
 .footer button:disabled {
   opacity: 0.45;
   cursor: not-allowed;

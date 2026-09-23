@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/common/Button';
 import { Icon } from '../../components/common/Icon';
@@ -22,6 +23,7 @@ import {
   rejectKnowledgeObject,
 } from '../../services/knowledge';
 import { ApiError } from '../../services/apiClient';
+import { ROUTES } from '../../constants/navigation';
 import type {
   CompanyStats,
   DocumentChunk,
@@ -49,6 +51,8 @@ import styles from './SopCountCard.module.css';
 interface SopCountCardProps {
   companyId: string;
   onChanged?: () => void;
+  /** `documents` on the company profile; `knowledge` on Company Knowledge. */
+  focus?: 'documents' | 'knowledge';
 }
 
 type UploadState = 'uploading' | 'extracting' | 'structuring' | 'processing' | 'embedding' | 'finalizing' | 'completed' | 'cancelling' | 'cancelled' | 'processed' | 'failed' | 'needs_ocr';
@@ -156,28 +160,34 @@ function KnowledgeItemCard({
           </span>
         )}
         <strong className={styles.knowledgeValue}>{item.label}</strong>
-        {structureTree.length > 0 && <StructureTreeView nodes={structureTree} />}
-        {details.length > 0 && (
-          <ul className={styles.knowledgeDetails}>
-            {details.map((detail) => <li key={detail}>{detail}</li>)}
-          </ul>
-        )}
-        <div className={styles.knowledgeMeta}>
-          <span>{t('companyDetail.sopCount.tier', { value: t(`knowledgeTiers.${item.tier}`) })}</span>
-          <span>{t('companyDetail.sopCount.knowledgeStatus', { value: t(`knowledgeStatuses.${item.status}`) })}</span>
-          <span>{t('companyDetail.sopCount.sourceKind', { value: t(`knowledgeSourceKinds.${item.sourceKind}`) })}</span>
-          {sources.length > 1 ? (
-            <span>{t('companyDetail.sopCount.sourcesCount', { count: sources.length })}: {sources.map((source) => source.documentName).join(', ')}</span>
-          ) : (
-            <span>{t('companyDetail.sopCount.provenance')}: {item.sourceDocumentName} · {item.sourceLocation}</span>
+        <span className={styles.knowledgeType}>
+          {t(`knowledgeStatuses.${item.status}`)}
+        </span>
+        <details className={styles.details}>
+          <summary>{t('ux.details')}</summary>
+          {structureTree.length > 0 && <StructureTreeView nodes={structureTree} />}
+          {details.length > 0 && (
+            <ul className={styles.knowledgeDetails}>
+              {details.map((detail) => <li key={detail}>{detail}</li>)}
+            </ul>
           )}
-          {item.verifiedAt && (
-            <span>{t('companyDetail.sopCount.verifiedAt', { value: item.verifiedAt })}</span>
-          )}
-          {item.version > 1 && (
-            <span>{t('companyDetail.sopCount.version', { value: item.version })}</span>
-          )}
-        </div>
+          <div className={styles.knowledgeMeta}>
+            <span>{t('companyDetail.sopCount.tier', { value: t(`knowledgeTiers.${item.tier}`) })}</span>
+            <span>{t('companyDetail.sopCount.knowledgeStatus', { value: t(`knowledgeStatuses.${item.status}`) })}</span>
+            <span>{t('companyDetail.sopCount.sourceKind', { value: t(`knowledgeSourceKinds.${item.sourceKind}`) })}</span>
+            {sources.length > 1 ? (
+              <span>{t('companyDetail.sopCount.sourcesCount', { count: sources.length })}: {sources.map((source) => source.documentName).join(', ')}</span>
+            ) : (
+              <span>{t('companyDetail.sopCount.provenance')}: {item.sourceDocumentName} · {item.sourceLocation}</span>
+            )}
+            {item.verifiedAt && (
+              <span>{t('companyDetail.sopCount.verifiedAt', { value: item.verifiedAt })}</span>
+            )}
+            {item.version > 1 && (
+              <span>{t('companyDetail.sopCount.version', { value: item.version })}</span>
+            )}
+          </div>
+        </details>
       </div>
       <div className={styles.knowledgeActions}>
         {(item.status === 'proposed' || item.status === 'verified') && (
@@ -187,7 +197,7 @@ function KnowledgeItemCard({
         )}
         {item.status === 'proposed' && (
           <>
-            <Button variant="neutral" size="xs" disabled={busy !== null} onClick={() => onConfirm(item)}>
+            <Button size="xs" disabled={busy !== null} onClick={() => onConfirm(item)}>
               {t('companyDetail.sopCount.confirmKnowledge')}
             </Button>
             <Button variant="neutral" size="xs" disabled={busy !== null} onClick={() => onReject(item)}>
@@ -277,8 +287,32 @@ function TruncatedKnowledgeList({
 }
 
 /** Live document counters, multi-file upload, persisted list and deletion. */
-export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
+function plainDocumentStatus(status: DocumentDetail['status']): 'ready' | 'working' | 'attention' | 'needsText' | 'cancelled' {
+  if (status === 'processed') return 'ready';
+  if (status === 'failed') return 'attention';
+  if (status === 'needs_ocr') return 'needsText';
+  if (status === 'cancelled') return 'cancelled';
+  return 'working';
+}
+
+const PLAIN_STAGE: Record<string, string> = {
+  uploading: 'uploading',
+  extracting: 'reading',
+  structuring: 'organizing',
+  processing: 'reading',
+  embedding: 'finishing',
+  finalizing: 'finishing',
+  completed: 'ready',
+  processed: 'ready',
+  cancelled: 'cancelled',
+  cancelling: 'stopping',
+  failed: 'attention',
+  needs_ocr: 'needsText',
+};
+
+export function SopCountCard({ companyId, onChanged, focus = 'documents' }: SopCountCardProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const inFlight = useRef(new Set<string>());
   const uploadOperations = useRef(new Map<string, { id: string; controller: AbortController }>());
@@ -695,7 +729,8 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
 
   return (
     <div className={styles.card}>
-      <section className={styles.section}>
+      {focus === 'documents' && (
+      <section id="company-documents" className={styles.section}>
         <div className={styles.sectionHeader}>
           <div className={styles.sectionHeading}>
             <span className={styles.tileIcon}><Icon name="buildingSolid" size={28} /></span>
@@ -720,8 +755,8 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
             {uploads.map((item) => (
               <li key={item.key}>
                 <span>{item.filename}</span>
-                <span className={['uploading', 'processing', 'embedding', 'cancelling'].includes(item.state) ? styles.runningStatus : undefined}>{t(`companyDetail.sopCount.status.${item.state}`)}</span>
-                <span>{item.progress}% · {t(`companyDetail.sopCount.stage.${item.stage}`)}</span>
+                <span className={['uploading', 'processing', 'embedding', 'cancelling'].includes(item.state) ? styles.runningStatus : undefined}>{t(`ux.stagePlain.${PLAIN_STAGE[item.stage] ?? item.stage}`, { defaultValue: item.stage })}</span>
+                <span title={t(`companyDetail.sopCount.stage.${item.stage}`)}>{item.progress}%</span>
                 <progress className={styles.progress} max="100" value={item.progress}>{item.progress}%</progress>
                 {item.detail && <span title={item.detail}>{item.detail}</span>}
                 {['uploading', 'processing', 'embedding', 'cancelling'].includes(item.state) && (
@@ -735,34 +770,10 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
         <ul className={styles.documentList} aria-label={t('companyDetail.sopCount.documents')}>
           {documents.map((document) => (
             <li key={document.id}>
-              <button
-                type="button"
-                className={styles.documentName}
-                title={document.filename}
-                aria-expanded={expandedDocumentId === document.id}
-                onClick={() => void toggleChunks(document.id)}
-              >
-                {document.filename}
-              </button>
-              <span>{document.status === 'processed'
-                ? stats?.aiFeaturesEnabled && document.embeddedChunkCount < document.semanticChunkCount
-                  ? `${t('companyDetail.sopCount.embeddingCount', { embedded: document.embeddedChunkCount, chunks: document.semanticChunkCount })} · ${t('companyDetail.sopCount.status.embedding')}`
-                  : t('companyDetail.sopCount.status.completed')
-                : t(`companyDetail.sopCount.status.${document.status}`)}</span>
-              {stats?.aiFeaturesEnabled
-                && document.status === 'processed'
-                && document.embeddedChunkCount < document.semanticChunkCount && (
-                <Button
-                  variant="outline"
-                  size="xs"
-                  disabled={embeddingRetryIds.has(document.id)}
-                  onClick={() => void handleRetryEmbeddings(document)}
-                >
-                  {embeddingRetryIds.has(document.id)
-                    ? t('companyDetail.sopCount.retryingEmbeddings')
-                    : t('companyDetail.sopCount.retryEmbeddings')}
-                </Button>
-              )}
+              <span className={styles.documentName} title={document.filename}>{document.filename}</span>
+              <span className={plainDocumentStatus(document.status) === 'attention' || plainDocumentStatus(document.status) === 'needsText' ? styles.docStatusAttention : styles.docStatus}>
+                {t(`ux.docStatus.${plainDocumentStatus(document.status)}`)}
+              </span>
               <Button
                 variant="neutral"
                 size="xs"
@@ -773,29 +784,66 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
                   ? t('companyDetail.sopCount.deleting')
                   : t('companyDetail.sopCount.delete')}
               </Button>
-              {document.status === 'processed' && <Button variant="neutral" size="xs" onClick={() => void openPreview(document)}>{t('companyDetail.sopCount.preview')}</Button>}
+              <Button variant="outline" size="xs" onClick={() => void toggleChunks(document.id)}>
+                {expandedDocumentId === document.id ? t('ux.hideDetails') : t('ux.details')}
+              </Button>
               {expandedDocumentId === document.id && (
-                <ul className={styles.chunkList}>
-                  {chunksLoading && <li>{t('common.loading')}</li>}
-                  {chunkError && <li role="alert">{chunkError}</li>}
-                  {!chunksLoading && !chunkError && (chunks[document.id]?.length ?? 0) === 0 && (
-                    <li>{t('companyDetail.sopCount.noChunks')}</li>
+                <div className={styles.documentAdvanced}>
+                  <p>{t(`companyDetail.sopCount.status.${document.status}`)}</p>
+                  {stats?.aiFeaturesEnabled && (
+                    <p>{t('companyDetail.sopCount.embeddingCount', { embedded: document.embeddedChunkCount, chunks: document.semanticChunkCount })}</p>
                   )}
-                  {chunks[document.id]?.map((chunk) => (
-                    <li key={chunk.id}>
-                      <strong>{chunk.headingPath.join(' › ') || `#${chunk.chunkOrder + 1}`}</strong>
-                      <span>{chunk.text}</span>
-                      <span>{t('companyDetail.sopCount.tier', { value: chunk.tier })}</span>
-                    </li>
-                  ))}
-                </ul>
+                  {stats?.aiFeaturesEnabled
+                    && document.status === 'processed'
+                    && document.embeddedChunkCount < document.semanticChunkCount && (
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      disabled={embeddingRetryIds.has(document.id)}
+                      onClick={() => void handleRetryEmbeddings(document)}
+                    >
+                      {embeddingRetryIds.has(document.id)
+                        ? t('companyDetail.sopCount.retryingEmbeddings')
+                        : t('companyDetail.sopCount.retryEmbeddings')}
+                    </Button>
+                  )}
+                  {document.status === 'processed' && (
+                    <Button variant="neutral" size="xs" onClick={() => void openPreview(document)}>
+                      {t('companyDetail.sopCount.preview')}
+                    </Button>
+                  )}
+                  <ul className={styles.chunkList}>
+                    {chunksLoading && <li>{t('common.loading')}</li>}
+                    {chunkError && <li role="alert">{chunkError}</li>}
+                    {!chunksLoading && !chunkError && (chunks[document.id]?.length ?? 0) === 0 && (
+                      <li>{t('companyDetail.sopCount.noChunks')}</li>
+                    )}
+                    {chunks[document.id]?.map((chunk) => (
+                      <li key={chunk.id}>
+                        <strong>{chunk.headingPath.join(' / ') || `#${chunk.chunkOrder + 1}`}</strong>
+                        <span>{chunk.text}</span>
+                        <span>{t('companyDetail.sopCount.tier', { value: chunk.tier })}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </li>
           ))}
         </ul>
+        {!loading && documents.length === 0 && (
+          <p className={styles.description}>{t('ux.documents.empty')}</p>
+        )}
+        <div className={styles.sectionActions}>
+          <Button variant="outline" size="sm" onClick={() => navigate(`${ROUTES.knowledge}?company=${companyId}`)}>
+            {t('ux.readiness.action.review')}
+          </Button>
+        </div>
 
       </section>
+      )}
 
+      {focus === 'knowledge' && (
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h3 className={styles.title}>{t('companyDetail.sopCount.knowledgeObjects')}</h3>
@@ -814,6 +862,28 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
           rejected: knowledge.filter((item) => item.status === 'rejected').length,
         })}</p>
 
+        <p className={styles.knowledgeIntro}>{t('ux.knowledge.reviewLead')}</p>
+        <div className={styles.statusChips} role="tablist" aria-label={t('companyDetail.sopCount.filterStatus')}>
+          {([
+            ['proposed', 'ux.status.toReview'],
+            ['verified', 'ux.status.confirmed'],
+            ['rejected', 'ux.status.setAside'],
+            ['all', 'ux.status.all'],
+          ] as const).map(([value, labelKey]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === value}
+              className={statusFilter === value ? `${styles.statusChip} ${styles.statusChipActive}` : styles.statusChip}
+              onClick={() => setStatusFilter(value)}
+            >
+              {t(labelKey)}
+            </button>
+          ))}
+        </div>
+        <details className={styles.advanced}>
+          <summary>{t('ux.advanced')}</summary>
         <div className={styles.viewToggle} role="tablist" aria-label={t('companyDetail.sopCount.viewMode')}>
           <button
             type="button"
@@ -866,6 +936,7 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
             ))}
           </select>
         </div>
+        </details>
 
         {knowledge.length === 0 ? (
           <p className={styles.description}>{t('companyDetail.sopCount.noKnowledgeObjects')}</p>
@@ -964,6 +1035,7 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
           </div>
         )}
       </section>
+      )}
 
       <input
         ref={inputRef}
@@ -983,7 +1055,7 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
               <div><h3 id="extraction-preview-title">{t('companyDetail.sopCount.previewSuccess')}</h3><strong>{preview.document.filename}</strong></div>
               <Button variant="neutral" size="xs" onClick={() => setPreview(null)}>{t('companyDetail.sopCount.close')}</Button>
             </header>
-            <div className={styles.previewMeta}>{preview.document.sourceFormat.toUpperCase()} · {preview.document.status} · {preview.document.chunkCount} {t('companyDetail.sopCount.sections')} · {preview.document.embeddedChunkCount} {t('companyDetail.sopCount.embeddings')}</div>
+<details className={styles.details}><summary>{t('ux.details')}</summary>            <div className={styles.previewMeta}>{preview.document.sourceFormat.toUpperCase()} · {preview.document.status} · {preview.document.chunkCount} {t('companyDetail.sopCount.sections')} · {preview.document.embeddedChunkCount} {t('companyDetail.sopCount.embeddings')}</div></details>
             <h4>{t('companyDetail.sopCount.documentStructure')}</h4>
             <StructureTreeView
               nodes={buildStructureTree(
@@ -1004,6 +1076,7 @@ export function SopCountCard({ companyId, onChanged }: SopCountCardProps) {
             <h3 id="delete-sop-title">{t('companyDetail.sopCount.deleteTitle')}</h3>
             <p>{pendingDelete.filename}</p>
             <p>{t('companyDetail.sopCount.deleteWarning')}</p>
+            <details className={styles.details}><summary>{t('ux.details')}</summary><p>{t('companyDetail.sopCount.deleteWarningAdvanced')}</p></details>
             {loadError && <p className={styles.deleteError} role="alert">{loadError}</p>}
             <div className={styles.confirmActions}>
               <Button variant="neutral" size="sm" disabled={deletingIds.has(pendingDelete.id)} onClick={() => setPendingDelete(null)}>{t('companyDetail.sopCount.cancel')}</Button>

@@ -347,3 +347,49 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.docStatus,
+.docStatusAttention {
+  flex: none;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.docStatus { color: var(--c-text-soft); }
+.docStatusAttention { color: var(--c-error); }
+.documentAdvanced {
+  flex: 1 0 100%;
+  display: grid;
+  gap: 8px;
+  padding: 8px 0 4px;
+}
+.sectionActions { margin-top: 16px; }
+.knowledgeIntro {
+  margin: 0 0 12px;
+  color: var(--c-text-soft);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.statusChips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.statusChip {
+  padding: 6px 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-pill);
+  background: var(--c-surface);
+  color: var(--c-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.statusChipActive {
+  background: var(--c-brand-soft);
+  border-color: transparent;
+  color: var(--c-brand);
+}
+.details, .advanced { margin: 8px 0 14px; }
+.details summary, .advanced summary {
+  cursor: pointer;
+  color: var(--c-brand);
+  font-weight: 600;
+}
+.advanced .viewToggle, .advanced .knowledgeFilters { margin-top: 12px; }

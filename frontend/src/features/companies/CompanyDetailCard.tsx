@@ -6,6 +6,7 @@ import { StatusBadge } from '../../components/common/StatusBadge';
 import { deleteCompany } from '../../services/companies';
 import { formatDate } from '../../utils/formatDate';
 import type { Company } from '../../types';
+import { CompanyReadiness } from './CompanyReadiness';
 import { SopCountCard } from './SopCountCard';
 import styles from './CompanyDetailCard.module.css';
 
@@ -154,7 +155,9 @@ export function CompanyDetailCard({ company, onChanged, onDeleted }: CompanyDeta
 
       <hr className={styles.rule} />
 
-      <SopCountCard companyId={company.id} onChanged={onChanged} />
+      <CompanyReadiness companyId={company.id} companyName={company.name} embedded />
+
+      <SopCountCard companyId={company.id} focus="documents" onChanged={onChanged} />
 
       <hr className={styles.rule} />
 
@@ -186,6 +189,10 @@ export function CompanyDetailCard({ company, onChanged, onDeleted }: CompanyDeta
             <p>{t('companyDetail.deleteCompanyLead')}</p>
             <p className={styles.confirmCompanyName}>{company.name}</p>
             <p>{t('companyDetail.deleteCompanyWarning')}</p>
+            <details>
+              <summary>{t('ux.details')}</summary>
+              <p>{t('companyDetail.deleteCompanyWarningAdvanced')}</p>
+            </details>
             <label className={styles.confirmLabel} htmlFor="delete-company-name">
               {t('companyDetail.deleteCompanyConfirmLabel', { name: company.name })}
             </label>

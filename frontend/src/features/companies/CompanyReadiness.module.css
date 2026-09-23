@@ -1,0 +1,178 @@
+.card,
+.embedded {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card {
+  padding: 20px 22px 22px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  background: var(--c-surface);
+}
+
+.embedded {
+  margin: 8px 0 4px;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.lead,
+.summary,
+.note {
+  margin: 4px 0 0;
+  color: var(--c-text-soft);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.percent {
+  flex: none;
+  margin: 0;
+  color: var(--c-brand);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  background: var(--c-surface);
+}
+
+.done {
+  border-color: transparent;
+  background: var(--c-brand-soft);
+}
+
+.current {
+  border-color: var(--c-brand);
+  background: var(--c-surface);
+}
+
+.upcoming {
+  color: var(--c-text-muted);
+}
+
+.attention {
+  border-color: var(--c-error);
+}
+
+.stepIndex {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--c-brand-tile);
+  color: var(--c-brand);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.upcoming .stepIndex {
+  background: var(--c-track);
+  color: var(--c-text-muted);
+}
+
+.attention .stepIndex {
+  background: #fde8e6;
+  color: var(--c-error);
+}
+
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stepName {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.stepState {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--c-text-muted);
+}
+
+.done .stepState,
+.current .stepState {
+  color: var(--c-brand);
+}
+
+.attention .stepState {
+  color: var(--c-error);
+}
+
+.summary {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+}
+
+.error {
+  margin: 0;
+  color: var(--c-error);
+  font-size: 14px;
+}
+
+.retry {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--c-brand);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .steps {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .heading {
+    flex-direction: column;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}

@@ -6,7 +6,7 @@ import { SidebarFooter } from './SidebarFooter';
 import { Wordmark } from './Wordmark';
 import styles from './Sidebar.module.css';
 
-/** Wide sidebar used by the Unternehmensprofile screen. */
+/** Labelled navigation for the everyday product tasks. */
 export function Sidebar() {
   const { t } = useTranslation();
 
@@ -14,16 +14,17 @@ export function Sidebar() {
     <aside className={styles.sidebar}>
       <Wordmark />
 
-      <nav className={styles.nav}>
+      <nav className={styles.nav} aria-label={t('ux.navLabel')}>
         {SIDEBAR_NAV.map((item) => (
           <NavLink
             key={item.id}
             to={item.to}
+            end={item.end}
             className={({ isActive }) =>
               isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem
             }
           >
-            <Icon name={item.icon} size={30} />
+            <Icon name={item.icon} size={22} />
             <span>{t(item.labelKey)}</span>
           </NavLink>
         ))}

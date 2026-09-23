@@ -223,6 +223,8 @@ export interface NavItem {
   labelKey: string;
   icon: IconName;
   to: string;
+  /** Match only this path, not longer paths that start with it. */
+  end?: boolean;
 }
 
 /** A step in a wizard progress header. */

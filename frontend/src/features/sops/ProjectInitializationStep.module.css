@@ -18,6 +18,25 @@
   line-height: 1.2;
 }
 
+.simpleStack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 28px;
+  max-width: 720px;
+}
+
+.advanced {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.advanced summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--c-text-muted);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -21,7 +21,7 @@ planning, not formal metrics.
 
 | Local LLM adapters | Implemented | 70% | Production model/embed-dim decisions |
 | CKM management product | Partial | 70% | Standalone CKM route; tier presentation polish |
-| SOP wizard | Partial | 35% | Steps 05–06, design-backed blueprint UI, editor |
+| SOP wizard | Partial | 50% | Prose generation; approval/version UI; design-PDF polish |
 | SOP backend + generation | Partial | 25% | Grounded draft pipeline; approval/versioning |
 | SOP approval / versioning | Missing | 0% | Review, approve, immutable versions |
 | Frontend automated tests | Missing | 0% | Test runner + coverage for critical flows |
@@ -62,10 +62,15 @@ place (platform, companies, documents, CKM review loop); **~52%** still to build
   typed-name confirmation); list selection updates without reload.
 - Company onboarding UI with persisted profile answers, idempotent create,
   staged document/template upload, local draft restore.
-- SOP wizard **step 01** (project initialization) implemented; steps 02–04 show
-  a functional Blueprint review (not a design-PDF screen).
-- Placeholder routes for screens without an approved design (SOP library,
-  workflows, knowledge, assistant, records, alerts, settings, help).
+- SOP wizard is a **4-step guided Create SOP** flow (title → prepare → check →
+  document draft) over create-project / build-blueprint / mark-ready APIs.
+  No SOP prose generator yet; draft body uses mapped verified knowledge and
+  keeps blocked sections blocked.
+- Everyday navigation is Companies, Company Knowledge, Create SOP, SOPs and
+  Settings. Company Knowledge is a guided review experience (summary counts,
+  plain-language groups, Accept/Edit/Reject) over the existing KO confirm/
+  edit/reject APIs; SOPs remain a plain-language entry to the wizard. Workflows, assistant, records, alerts and
+  help stay reachable from Settings.
 
 ### Backend and data
 

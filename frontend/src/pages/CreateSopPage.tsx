@@ -1,40 +1,49 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../components/common/Button';
 import { Icon } from '../components/common/Icon';
 import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
 import { WizardStepper } from '../components/navigation/WizardStepper';
-import { BlueprintReviewStep } from '../features/sops/BlueprintReviewStep';
 import { ProjectInitializationStep } from '../features/sops/ProjectInitializationStep';
+import { SopDraftDocumentStep } from '../features/sops/SopDraftDocumentStep';
+import { SopPreparationStep } from '../features/sops/SopPreparationStep';
+import { SopReadinessCheckStep } from '../features/sops/SopReadinessCheckStep';
 import { WIZARD_STEPS } from '../constants/wizard';
-import { buildSopBlueprint, createSopProject } from '../services/sops';
+import { ROUTES } from '../constants/navigation';
+import {
+  buildSopBlueprint,
+  createSopProject,
+  markSopGenerationReady,
+} from '../services/sops';
 import type { ProjectInitializationForm, SopProject } from '../types';
 import styles from './CreateSopPage.module.css';
 
-/** Initial form state reproducing the populated state shown in the design. */
 const INITIAL_FORM: ProjectInitializationForm = {
   title: '',
   companyId: '',
-  contextOptionIds: ['audit-finding'],
+  contextOptionIds: [],
   additionalContext: '',
 };
 
-/** SOP creation wizard. Blueprint review is functional; later steps stay undesigned. */
+/** Guided Create SOP wizard for QA users. Reuses project + blueprint APIs. */
 export function CreateSopPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [form, setForm] = useState<ProjectInitializationForm>(INITIAL_FORM);
+  const [form, setForm] = useState<ProjectInitializationForm>({
+    ...INITIAL_FORM,
+    companyId: searchParams.get('company') ?? '',
+  });
   const [project, setProject] = useState<SopProject | null>(null);
   const [blueprintLoading, setBlueprintLoading] = useState(false);
   const [blueprintError, setBlueprintError] = useState<string | null>(null);
+  const [gapAnswers, setGapAnswers] = useState<Record<string, string>>({});
+  const [saveBusy, setSaveBusy] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const autoAdvanceRef = useRef(false);
 
-  const isFirstStep = activeIndex === 0;
-  const isLastStep = activeIndex === WIZARD_STEPS.length - 1;
-  const activeStep = WIZARD_STEPS[activeIndex];
-  const nextStep = WIZARD_STEPS[activeIndex + 1];
-  const showBlueprint = activeIndex >= 1 && activeIndex <= 3;
   const canContinueFromInit = Boolean(form.title.trim() && form.companyId);
 
   const ensureBlueprint = async () => {
@@ -48,9 +57,9 @@ export function CreateSopPage() {
       const topic = form.title.trim();
       let next = project;
       if (
-        next == null ||
-        next.companyId !== form.companyId ||
-        next.title !== form.title.trim()
+        next == null
+        || next.companyId !== form.companyId
+        || next.title !== form.title.trim()
       ) {
         next = await createSopProject(form.companyId, {
           title: form.title.trim(),
@@ -70,12 +79,70 @@ export function CreateSopPage() {
     }
   };
 
-  const goNext = async () => {
-    if (isFirstStep) {
-      const built = await ensureBlueprint();
-      if (!built) return;
+  const startPreparation = async () => {
+    autoAdvanceRef.current = true;
+    setActiveIndex(1);
+    const built = await ensureBlueprint();
+    if (!built) {
+      autoAdvanceRef.current = false;
     }
-    setActiveIndex((index) => Math.min(WIZARD_STEPS.length - 1, index + 1));
+  };
+
+  useEffect(() => {
+    if (activeIndex !== 1) return;
+    if (blueprintLoading) return;
+    if (blueprintError) return;
+    if (!project?.blueprint) return;
+    if (!autoAdvanceRef.current) return;
+    autoAdvanceRef.current = false;
+    setActiveIndex(2);
+  }, [activeIndex, blueprintLoading, blueprintError, project]);
+
+  const createDraft = async () => {
+    if (!project || !form.companyId) return;
+    setSaveBusy(true);
+    setSaveMessage(null);
+    try {
+      const next = await markSopGenerationReady(form.companyId, project.id);
+      setProject(next);
+      setActiveIndex(3);
+    } catch (caught: unknown) {
+      setBlueprintError(caught instanceof Error ? caught.message : t('common.requestFailed'));
+    } finally {
+      setSaveBusy(false);
+    }
+  };
+
+  const saveDraft = async () => {
+    if (!project || !form.companyId) return;
+    setSaveBusy(true);
+    setSaveMessage(null);
+    try {
+      const next = project.status === 'generation_ready'
+        ? project
+        : await markSopGenerationReady(form.companyId, project.id);
+      setProject(next);
+      setSaveMessage(t('sop.guided.draft.saved'));
+    } catch (caught: unknown) {
+      setBlueprintError(caught instanceof Error ? caught.message : t('common.requestFailed'));
+    } finally {
+      setSaveBusy(false);
+    }
+  };
+
+  const regenerate = async () => {
+    autoAdvanceRef.current = false;
+    setActiveIndex(1);
+    const built = await ensureBlueprint();
+    if (built) setActiveIndex(2);
+  };
+
+  const footerBack = () => {
+    if (activeIndex === 0) {
+      navigate(-1);
+      return;
+    }
+    setActiveIndex((index) => Math.max(0, index - 1));
   };
 
   return (
@@ -85,39 +152,57 @@ export function CreateSopPage() {
           variant="neutral"
           size="sm"
           leadingIcon={<Icon name="chevronLeft" size={18} strokeWidth={1.9} />}
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(ROUTES.sopLibrary)}
         >
           {t('sop.wizard.back')}
         </Button>
-
         <LanguageSwitcher />
       </div>
 
       <WizardStepper
         steps={WIZARD_STEPS}
         activeIndex={activeIndex}
-        onStepSelect={setActiveIndex}
+        onStepSelect={(index) => {
+          if (index <= activeIndex) setActiveIndex(index);
+        }}
       />
 
       <div className={styles.body}>
-        {isFirstStep ? (
+        {activeIndex === 0 && (
           <ProjectInitializationStep value={form} onChange={setForm} />
-        ) : showBlueprint ? (
-          <BlueprintReviewStep
-            project={project}
+        )}
+        {activeIndex === 1 && (
+          <SopPreparationStep
             loading={blueprintLoading}
             error={blueprintError}
-            onRebuild={() => {
-              void ensureBlueprint();
+            done={Boolean(project?.blueprint) && !blueprintLoading && !blueprintError}
+          />
+        )}
+        {activeIndex === 2 && (
+          <SopReadinessCheckStep
+            project={project}
+            gapAnswers={gapAnswers}
+            onGapAnswerChange={(key, value) => {
+              setGapAnswers((current) => ({ ...current, [key]: value }));
             }}
           />
-        ) : (
-          <div className={styles.notDesigned}>
-            <h2 className={styles.notDesignedTitle}>
-              {activeStep.ordinal}. {t(activeStep.labelKey)}
-            </h2>
-            <p className={styles.notDesignedText}>{t('sop.wizard.notDesigned')}</p>
-          </div>
+        )}
+        {activeIndex === 3 && project && (
+          <SopDraftDocumentStep
+            project={project}
+            gapAnswers={gapAnswers}
+            busy={saveBusy || blueprintLoading}
+            onEdit={() => setActiveIndex(0)}
+            onRegenerate={() => {
+              void regenerate();
+            }}
+            onSaveDraft={() => {
+              void saveDraft();
+            }}
+          />
+        )}
+        {saveMessage && (
+          <p className={styles.saveMessage} role="status">{saveMessage}</p>
         )}
       </div>
 
@@ -125,33 +210,59 @@ export function CreateSopPage() {
         <Button
           variant="neutral"
           leadingIcon={<Icon name="chevronLeft" size={20} strokeWidth={1.9} />}
-          disabled={isFirstStep}
-          onClick={() => setActiveIndex((index) => Math.max(0, index - 1))}
+          onClick={footerBack}
+          disabled={activeIndex === 1 && blueprintLoading}
         >
           {t('sop.wizard.back')}
         </Button>
 
         <div className={styles.footerActions}>
-          <Button
-            variant="outline"
-            leadingIcon={<Icon name="search" size={20} strokeWidth={1.9} />}
-            disabled
-            title={t('sop.wizard.searchUnavailable')}
-          >
-            {t('sop.wizard.searchSimilar')}
-          </Button>
-
-          <Button
-            trailingIcon={<Icon name="arrowRight" size={20} strokeWidth={1.9} />}
-            disabled={isLastStep || blueprintLoading || (isFirstStep && !canContinueFromInit)}
-            onClick={() => {
-              void goNext();
-            }}
-          >
-            {nextStep
-              ? t('sop.wizard.continueTo', { step: t(nextStep.labelKey) })
-              : t('sop.wizard.finish')}
-          </Button>
+          {activeIndex === 0 && (
+            <Button
+              trailingIcon={<Icon name="arrowRight" size={20} strokeWidth={1.9} />}
+              disabled={!canContinueFromInit || blueprintLoading}
+              onClick={() => {
+                void startPreparation();
+              }}
+            >
+              {t('sop.guided.continue')}
+            </Button>
+          )}
+          {activeIndex === 1 && blueprintError && (
+            <Button
+              onClick={() => {
+                void startPreparation();
+              }}
+            >
+              {t('sop.guided.retryPrepare')}
+            </Button>
+          )}
+          {activeIndex === 1 && !blueprintLoading && !blueprintError && project?.blueprint && (
+            <Button
+              trailingIcon={<Icon name="arrowRight" size={20} strokeWidth={1.9} />}
+              onClick={() => setActiveIndex(2)}
+            >
+              {t('sop.guided.continue')}
+            </Button>
+          )}
+          {activeIndex === 2 && (
+            <Button
+              trailingIcon={<Icon name="arrowRight" size={20} strokeWidth={1.9} />}
+              disabled={!project?.blueprint || saveBusy}
+              onClick={() => {
+                void createDraft();
+              }}
+            >
+              {t('sop.guided.createDraft')}
+            </Button>
+          )}
+          {activeIndex === 3 && (
+            <Button
+              onClick={() => navigate(`${ROUTES.sopLibrary}?company=${form.companyId}`)}
+            >
+              {t('sop.guided.done')}
+            </Button>
+          )}
         </div>
       </footer>
     </div>

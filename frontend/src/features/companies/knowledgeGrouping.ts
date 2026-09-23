@@ -18,6 +18,61 @@ export const KNOWLEDGE_TYPE_SECTIONS = [
   { id: 'ai_preferences', types: ['ai_preference'] },
 ] as const;
 
+/**
+ * Plain-language review groups for QA reviewers.
+ * Backend types stay unchanged; unlisted types land in `other`.
+ */
+export const REVIEW_GROUPS = [
+  { id: 'people', types: ['role', 'responsibility'] },
+  { id: 'processes', types: ['workflow', 'process'] },
+  { id: 'rules', types: ['business_rule'] },
+  { id: 'terms', types: ['terminology'] },
+  { id: 'records', types: ['form_or_record'] },
+  { id: 'format', types: ['document_structure', 'writing_style'] },
+  { id: 'regulations', types: ['regulation'] },
+  { id: 'other', types: ['relationship', 'best_practice', 'ai_preference'] },
+] as const;
+
+export type ReviewGroupId = (typeof REVIEW_GROUPS)[number]['id'];
+
+const REVIEW_TYPE_TO_GROUP = new Map<string, ReviewGroupId>(
+  REVIEW_GROUPS.flatMap((group) => group.types.map((type) => [type, group.id] as const)),
+);
+
+export function reviewGroupIdForType(type: string): ReviewGroupId {
+  return REVIEW_TYPE_TO_GROUP.get(type) ?? 'other';
+}
+
+/** Human source line: "SOP-HR-001 > Responsibilities". */
+export function formatSourceLine(item: KnowledgeObject): string {
+  const sources = evidenceSources(item);
+  const primary = sources[0];
+  const documentName = primary?.documentName || item.sourceDocumentName || '';
+  const sectionParts = primary?.section?.filter(Boolean)
+    ?? (item.sourceLocation
+      ? item.sourceLocation.split(/[›>/]/).map((part) => part.trim()).filter(Boolean)
+      : []);
+  const section = sectionParts.join(' > ');
+  if (documentName && section) return `${documentName} > ${section}`;
+  if (documentName) return documentName;
+  if (section) return section;
+  return '';
+}
+
+export function groupForReview(
+  items: KnowledgeObject[],
+): Array<{ id: ReviewGroupId; items: KnowledgeObject[] }> {
+  const buckets = new Map<ReviewGroupId, KnowledgeObject[]>(
+    REVIEW_GROUPS.map((group) => [group.id, []]),
+  );
+  for (const item of items) {
+    buckets.get(reviewGroupIdForType(item.type))?.push(item);
+  }
+  return REVIEW_GROUPS
+    .map((group) => ({ id: group.id, items: buckets.get(group.id) ?? [] }))
+    .filter((group) => group.items.length > 0);
+}
+
 /** Subsections inside a By SOP accordion (Document Structure first). */
 export const SOP_TYPE_SECTIONS = [
   { id: 'document_structure', types: ['document_structure'] },

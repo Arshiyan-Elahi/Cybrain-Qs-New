@@ -2,10 +2,38 @@
   "language": {
     "label": "Sprache"
   },
-  "knowledgeTypes": {"terminology":"Terminologie", "document_structure":"Dokumentstruktur", "writing_style":"Schreibstil", "regulation":"Regularien", "role":"Rollen", "responsibility":"Verantwortlichkeiten", "workflow":"Workflows", "process":"Prozesse", "business_rule":"Geschäftsregeln", "form_or_record":"Records & Formulare", "relationship":"Beziehungen", "best_practice":"Best Practices", "ai_preference":"KI- / Qualitätspräferenzen"},
-  "knowledgeStatuses": {"proposed":"Vorgeschlagen", "verified":"Bestätigt", "rejected":"Abgelehnt", "superseded":"Ersetzt"},
-  "knowledgeSourceKinds": {"onboarding":"Onboarding", "uploaded_document":"Hochgeladenes Dokument", "human_created":"Menschlich erstellt", "ai_extracted":"KI-extrahiert"},
-  "knowledgeTiers": {"company":"Unternehmen", "industry":"Branche", "global":"Global"},
+  "knowledgeTypes": {
+    "terminology": "Terminologie",
+    "document_structure": "Dokumentstruktur",
+    "writing_style": "Schreibstil",
+    "regulation": "Regularien",
+    "role": "Rollen",
+    "responsibility": "Verantwortlichkeiten",
+    "workflow": "Workflows",
+    "process": "Prozesse",
+    "business_rule": "Geschäftsregeln",
+    "form_or_record": "Records & Formulare",
+    "relationship": "Beziehungen",
+    "best_practice": "Best Practices",
+    "ai_preference": "KI- / Qualitätspräferenzen"
+  },
+  "knowledgeStatuses": {
+    "proposed": "Zu prüfen",
+    "verified": "Bestätigt",
+    "rejected": "Zurückgestellt",
+    "superseded": "Ersetzt"
+  },
+  "knowledgeSourceKinds": {
+    "onboarding": "Aus der Firmeneinrichtung",
+    "uploaded_document": "Aus einem hochgeladenen Dokument",
+    "human_created": "Von einer Person hinzugefügt",
+    "ai_extracted": "Aus einem Dokument vorgeschlagen"
+  },
+  "knowledgeTiers": {
+    "company": "Unternehmen",
+    "industry": "Branche",
+    "global": "Global"
+  },
   "nav": {
     "companies": "Unternehmen",
     "sopCreate": "SOP erstellen",
@@ -16,19 +44,21 @@
     "alerts": "Meldungen",
     "settings": "Einstellungen",
     "help": "Helfen",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "companyKnowledge": "Unternehmenswissen",
+    "sops": "SOPs"
   },
   "companyProfiles": {
-    "title": "Unternehmensprofile",
-    "description": "Erstellen und verwalten Sie Company Profiles, die Grundlage für Ihr Company Knowledge Model.",
+    "title": "Unternehmen",
+    "description": "Richten Sie ein Unternehmen ein, laden Sie Dokumente hoch und sehen Sie, wann es für eine neue SOP bereit ist.",
     "createCompany": "Neue Firma anlegen",
     "searchPlaceholder": "Firma suchen...",
     "searchLabel": "Firma suchen",
     "empty": "Keine Firma gefunden.",
     "createdShort": "Erstellt",
     "info": {
-      "title": "Was ist ein Company Profile?",
-      "body": "Ein Company Profile ist der Startpunkt für den Aufbau Ihres Company Knowledge Models. Es enthält alle relevanten Informationen über Ihr Unternehmen, Ihre Regularien, Dokumentenstandards, Begriffe und Prozesse. Die KI nutzt dieses Wissen, um SOPs zu verstehen, zu verbessern und neu zu erstellen passend zu Ihrem Unternehmen."
+      "title": "So funktionieren Unternehmen",
+      "body": "Jedes Unternehmen behält seine eigenen Dokumente und das geprüfte Wissen. Cybrain verwendet nur das bestätigte Wissen dieses Unternehmens, wenn Sie eine SOP erstellen."
     },
     "noSelection": "Wählen Sie ein Unternehmen aus, um das Profil zu sehen.",
     "sopCount": "SOPs: {{count}}"
@@ -44,7 +74,7 @@
     "deleteCompany": "Unternehmen löschen",
     "deleteCompanyTitle": "Unternehmen löschen?",
     "deleteCompanyLead": "Sie löschen dauerhaft:",
-    "deleteCompanyWarning": "Dies löscht dauerhaft:\n- Unternehmensprofil und Onboarding-Daten\n- Alle hochgeladenen SOPs/Dokumente\n- Alle Dokument-Chunks\n- Alle pgvector-Embeddings\n- Gesamtes vorgeschlagene/abgelehnte/verifizierte Unternehmens-CKM\n- CKM-Evidence/Provenance/Historie dieses Unternehmens\n- Unternehmensspezifischen Verarbeitungszustand\n- Weitere unternehmenseigene generierte Daten\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteCompanyWarning": "Damit werden das Unternehmen, seine Dokumente und sein Wissen dauerhaft entfernt. Das kann nicht rückgängig gemacht werden.",
     "deleteCompanyConfirmLabel": "Geben Sie „{{name}}“ zur Bestätigung ein",
     "deleteCompanyCancel": "Abbrechen",
     "deleteCompanyPermanently": "Unternehmen dauerhaft löschen",
@@ -54,7 +84,7 @@
       "unit": "SOP's",
       "documentCount_one": "{{count}} SOP",
       "documentCount_other": "{{count}} SOPs",
-      "knowledgeCounts": "{{proposed}} Vorgeschlagen · {{confirmed}} Bestätigt · {{rejected}} Abgelehnt",
+      "knowledgeCounts": "{{proposed}} zu prüfen · {{confirmed}} bestätigt · {{rejected}} zurückgestellt",
       "filterType": "Nach Typ filtern",
       "filterStatus": "Nach Status filtern",
       "filterDocument": "Nach Dokument filtern",
@@ -71,8 +101,8 @@
       "verifiedAt": "Bestätigt: {{value}}",
       "version": "Version {{value}}",
       "viewMode": "Wissensansicht",
-      "viewByType": "Nach Wissenstyp",
-      "viewBySop": "Nach SOP",
+      "viewByType": "Nach Thema",
+      "viewBySop": "Nach Dokument",
       "showAll": "Alle anzeigen ({{count}})",
       "searchTerminology": "Terminologie durchsuchen",
       "noSearchMatches": "Keine Terminologie entspricht dieser Suche.",
@@ -95,47 +125,59 @@
         "writing_style": "Schreibstil",
         "ai_preferences": "KI- / Qualitätspräferenzen"
       },
-      "description": "Anzahl der hochgeladenen SOPs, die für dieses Company Knowledge Model analysiert wurden.",
+      "description": "Laden Sie die SOPs und Vorlagen hoch, die dieses Unternehmen bereits verwendet.",
       "showDocuments": "Dokumente anzeigen",
       "uploadDocument": "Dokument hochladen",
       "uploadDocuments": "Dokumente hochladen",
       "uploading": "Wird hochgeladen…",
       "uploadStatus": "Upload-Status",
-      "documents": "Hochgeladene Dokumente",
-      "knowledgeObjects": "Verfügbare Knowledge Objects",
-      "noKnowledgeObjects": "Für dieses Unternehmen wurden noch keine Knowledge Objects extrahiert.",
-      "extractKnowledge": "Wissen extrahieren",
+      "documents": "Dokumente",
+      "knowledgeObjects": "Unternehmenswissen",
+      "noKnowledgeObjects": "Noch nichts zu prüfen. Laden Sie auf der Unternehmensseite Dokumente hoch und lassen Sie danach das Wissen daraus ermitteln.",
+      "extractKnowledge": "Wissen in Dokumenten finden",
       "extracting": "Wird extrahiert…",
       "cancelling": "Wird abgebrochen…",
       "cancel": "Abbrechen",
       "confirmKnowledge": "Bestätigen",
       "editKnowledge": "Bearbeiten",
-      "rejectKnowledge": "Ablehnen",
+      "rejectKnowledge": "Zurückstellen",
       "editPrompt": "Bezeichnung des Knowledge Objects bearbeiten",
       "knowledgeStatus": "Status: {{value}}",
       "provenance": "Quelle",
       "preview": "Vorschau",
-      "previewSuccess": "Dokument erfolgreich extrahiert ✓",
+      "previewSuccess": "Dokument erfolgreich gelesen",
       "close": "Schließen",
       "sections": "Abschnitte",
       "embeddings": "Embeddings",
       "documentStructure": "Dokumentstruktur",
       "extractedContent": "Extrahierter Inhalt",
       "administrativeContent": "Administrative / Freigabe-Inhalte",
-      "stage": {"uploading":"Hochladen", "extracting":"Dokument wird extrahiert", "structuring":"Strukturierung und Chunking", "embedding":"Embeddings werden erstellt", "finalizing":"Abschluss", "completed":"Abgeschlossen", "cancelled":"Abgebrochen", "cancelling":"Wird abgebrochen", "failed":"Fehlgeschlagen", "processed":"Abgeschlossen", "needs_ocr":"OCR erforderlich"},
+      "stage": {
+        "uploading": "Hochladen",
+        "extracting": "Dokument wird extrahiert",
+        "structuring": "Strukturierung und Chunking",
+        "embedding": "Embeddings werden erstellt",
+        "finalizing": "Abschluss",
+        "completed": "Abgeschlossen",
+        "cancelled": "Abgebrochen",
+        "cancelling": "Wird abgebrochen",
+        "failed": "Fehlgeschlagen",
+        "processed": "Abgeschlossen",
+        "needs_ocr": "OCR erforderlich"
+      },
       "noChunks": "Keine strukturierten Abschnitte verfügbar.",
-      "tier": "Ebene: {{value}}",
+      "tier": "Gilt für: {{value}}",
       "embeddingCount": "{{embedded}}/{{chunks}} eingebettet",
       "retryEmbeddings": "Embeddings erneut versuchen",
       "retryingEmbeddings": "Einbettung…",
       "delete": "Löschen",
       "deleting": "Wird gelöscht…",
-      "deleteTitle": "SOP löschen?",
-      "deleteWarning": "Dies entfernt dauerhaft:\n- Dokumentdatensatz\n- extrahierte/normalisierte Dokumentdaten\n- Chunks\n- pgvector-Embeddings\n- dokumentbezogene vorgeschlagene CKM-Inhalte\n- Verarbeitungs-/Abbruchzustand\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteTitle": "Dieses Dokument löschen?",
+      "deleteWarning": "Damit werden das Dokument und das noch nicht bestätigte Wissen, das nur daraus stammt, dauerhaft entfernt. Das kann nicht rückgängig gemacht werden.",
       "deletePermanently": "Dauerhaft löschen",
       "deleteSuccess": "{{filename}} wurde gelöscht.",
       "deleteBlockedTitle": "Diese SOP kann noch nicht dauerhaft gelöscht werden.",
-      "deleteBlockedMessage": "Verifiziertes Unternehmenswissen hängt noch von diesem Dokument ab. Prüfen Sie diese Abhängigkeiten vor dem Löschen.",
+      "deleteBlockedMessage": "Bestätigtes Unternehmenswissen hängt noch an diesem Dokument. Prüfen Sie diese Einträge, bevor Sie es löschen.",
       "deleteBlockedCount_one": "{{count}} verifiziertes Knowledge Object hängt davon ab.",
       "deleteBlockedCount_other": "{{count}} verifizierte Knowledge Objects hängen davon ab.",
       "reviewDependencies": "Abhängigkeiten prüfen",
@@ -143,19 +185,20 @@
         "uploaded": "Hochgeladen",
         "uploading": "Wird hochgeladen…",
         "processing": "In Bearbeitung",
-        "embedding": "Embeddings werden erstellt…",
+        "embedding": "Embedding",
         "cancelling": "Wird abgebrochen…",
         "cancelled": "Abgebrochen",
         "processed": "Verarbeitet",
         "completed": "Abgeschlossen",
-        "embedding": "Embedding",
         "failed": "Fehlgeschlagen",
         "needs_ocr": "OCR erforderlich"
       },
       "uploaded": "{{filename}} in {{chunks}} Abschnitte verarbeitet.",
       "uploadRejected": "Upload abgelehnt. {{reason}}",
-      "needsOcr": "Keine Textebene gefunden. Dieses Dokument benötigt OCR."
-    }
+      "needsOcr": "Keine Textebene gefunden. Dieses Dokument benötigt OCR.",
+      "deleteWarningAdvanced": "Dies entfernt dauerhaft:\n- Dokumentdatensatz\n- extrahierte/normalisierte Dokumentdaten\n- Chunks\n- pgvector-Embeddings\n- dokumentbezogene vorgeschlagene CKM-Inhalte\n- Verarbeitungs-/Abbruchzustand\n\nDiese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "deleteCompanyWarningAdvanced": "Dies löscht dauerhaft:\n- Unternehmensprofil und Onboarding-Daten\n- Alle hochgeladenen SOPs/Dokumente\n- Alle Dokument-Chunks\n- Alle pgvector-Embeddings\n- Gesamtes vorgeschlagene/abgelehnte/verifizierte Unternehmens-CKM\n- CKM-Evidence/Provenance/Historie dieses Unternehmens\n- Unternehmensspezifischen Verarbeitungszustand\n- Weitere unternehmenseigene generierte Daten\n\nDiese Aktion kann nicht rückgängig gemacht werden."
   },
   "companyData": {
     "industry": {
@@ -192,36 +235,36 @@
     "wizard": {
       "back": "Zurück",
       "stepperLabel": "SOP-Assistent Schritte",
-      "searchSimilar": "Search Similar Content",
+      "searchSimilar": "Ähnliche SOPs suchen",
       "searchUnavailable": "Die Ähnlichkeitssuche ist nicht verfügbar, da die Backend-API noch nicht implementiert ist.",
       "continueTo": "Weiter zur {{step}}",
       "finish": "Abschließen",
       "notDesigned": "Für diesen Schritt liegt noch kein Design vor. Der Schritt wird ergänzt, sobald das Layout verfügbar ist."
     },
     "blueprint": {
-      "title": "SOP-Bauplan",
-      "subtitle": "Prüfen Sie die geplanten Abschnitte, das bestätigte Wissen, die Quellenbelege und die Lücken, bevor SOP-Text erzeugt wird.",
-      "rebuild": "Bauplan neu aufbauen",
+      "title": "SOP-Plan",
+      "subtitle": "Prüfen Sie die Abschnitte, das bestätigte Wissen und was noch fehlt. In diesem Schritt wird noch kein SOP-Text geschrieben.",
+      "rebuild": "Plan aktualisieren",
       "building": "Bauplan wird erstellt…",
-      "needTitleAndCompany": "Geben Sie einen SOP-Titel ein und wählen Sie ein Unternehmen, bevor der Bauplan erstellt wird.",
-      "structureSource": "Strukturquelle",
+      "needTitleAndCompany": "Geben Sie einen SOP-Titel ein und wählen Sie ein Unternehmen, bevor Sie fortfahren.",
+      "structureSource": "Gliederung basiert auf",
       "structure": {
-        "verified_document_structure": "Bestätigte Unternehmens-Dokumentstruktur",
-        "uploaded_sop_structure": "Gliederung aus hochgeladener SOP (kein bestätigtes CKM)",
-        "generic_fallback": "Generische Ersatzstruktur"
+        "verified_document_structure": "Ihre bestätigte Dokumentgliederung",
+        "uploaded_sop_structure": "Gliederung einer hochgeladenen SOP, noch nicht bestätigt",
+        "generic_fallback": "Eine Standardgliederung, weil noch keine Firmengliederung bestätigt ist"
       },
-      "summary": "{{grounded}} fundiert · {{partial}} teilweise · {{blocked}} blockiert · {{gaps}} Lücken · {{verified}} bestätigte Wissensobjekte zugeordnet",
+      "summary": "{{grounded}} Abschnitte bereit · {{partial}} brauchen mehr Detail · {{blocked}} blockiert · {{gaps}} Lücken · {{verified}} bestätigte Einträge verwendet",
       "mappedKnowledge": "Bestätigtes Wissen",
-      "noVerifiedKnowledge": "Diesem Abschnitt sind keine bestätigten Wissensobjekte zugeordnet.",
-      "sourceEvidence": "Unterstützende Quellenabschnitte",
-      "noChunks": "Keine unterstützenden Quellenabschnitte zugeordnet.",
+      "noVerifiedKnowledge": "Für diesen Abschnitt gibt es noch kein bestätigtes Wissen.",
+      "sourceEvidence": "Belegstellen",
+      "noChunks": "Keine Belegstellen für diesen Abschnitt.",
       "regulations": "Regulatorische Referenzen",
-      "gaps": "Fehlendes Wissen",
+      "gaps": "Noch fehlend",
       "noGaps": "Für diesen Abschnitt sind keine Lücken erfasst.",
-      "guidance": "Hinweise für die spätere Erzeugung (keine SOP-Fakten)",
+      "guidance": "Hinweise für den späteren Entwurf",
       "status": {
-        "grounded": "Fundiert",
-        "partial": "Teilweise",
+        "grounded": "Bereit",
+        "partial": "Mehr Detail nötig",
         "blocked": "Blockiert"
       },
       "severity": {
@@ -230,12 +273,16 @@
       }
     },
     "steps": {
-      "project-initialization": "Projektinitialisierung",
-      "knowledge-selection": "Wissensauswahl",
-      "blueprint-builder": "Bauplan-Editor",
-      "knowledge-mapping": "Wissenskartierung",
-      "draft-generation": "Entwurfserstellung",
-      "review-iteration": "Überprüfung & Iteration"
+      "what-to-create": "Was erstellen",
+      "preparing": "Vorbereitung",
+      "check-before": "Vor dem Erstellen prüfen",
+      "sop-draft": "SOP-Entwurf",
+      "project-initialization": "Was erstellen",
+      "knowledge-selection": "Vorbereitung",
+      "blueprint-builder": "Vor dem Erstellen prüfen",
+      "knowledge-mapping": "Vor dem Erstellen prüfen",
+      "draft-generation": "SOP-Entwurf",
+      "review-iteration": "SOP-Entwurf"
     },
     "step01": {
       "subtitle": "Beginnen Sie Ihr neues SOP-Projekt, indem Sie grundlegende Informationen bereitstellen.",
@@ -289,6 +336,86 @@
       "relative": {
         "today": "Heute",
         "yesterday": "Gestern"
+      }
+    },
+    "guided": {
+      "continue": "Weiter",
+      "createDraft": "Entwurf erstellen",
+      "retryPrepare": "Erneut versuchen",
+      "done": "Fertig",
+      "step1": {
+        "subtitle": "Sagen Sie Cybrain, welche SOP Sie erstellen möchten.",
+        "titleLabel": "SOP-Titel",
+        "titleHint": "Verwenden Sie einen klaren Namen, den Prüfer wiedererkennen.",
+        "titlePlaceholder": "Schulung und Nachschulung von GxP-Personal",
+        "instructionsLabel": "Optionale Hinweise",
+        "instructionsHint": "Ergänzen Sie alles, was Cybrain für diese SOP wissen soll.",
+        "instructionsPlaceholder": "Ergänzen Sie alles, was Cybrain wissen soll"
+      },
+      "step2": {
+        "lead": "Cybrain bereitet Ihre SOP aus dem akzeptierten Unternehmenswissen und den Dokumenten vor.",
+        "working": "Cybrain bereitet die SOP vor…",
+        "done": "Vorbereitung abgeschlossen",
+        "doneBody": "Weiter, um zu prüfen, was bereit ist und was noch fehlt.",
+        "task": {
+          "knowledge": "Akzeptiertes Unternehmenswissen wird genutzt",
+          "outline": "SOP-Gliederung wird vorbereitet",
+          "evidence": "Belege werden verbunden",
+          "gaps": "Fehlende Pflichtinformationen werden ermittelt"
+        }
+      },
+      "step3": {
+        "hero": "Cybrain ist bereit, Ihre SOP zu erstellen",
+        "lead": "Prüfen Sie, was bereit ist. Beantworten Sie Pflichtfragen in klarer Sprache. Blockierte Abschnitte bleiben blockiert, bis das fehlende Unternehmenswissen akzeptiert ist.",
+        "noPlan": "Noch kein Vorbereitungsergebnis. Gehen Sie zurück und fahren Sie mit dem vorherigen Schritt fort.",
+        "readyHeading": "Bereit",
+        "needsHeading": "Benötigt Informationen",
+        "noneReady": "Noch keine Abschnitte vollständig bereit.",
+        "noneNeeds": "Nichts Erforderliches fehlt.",
+        "questionsHeading": "Erforderliche Informationen",
+        "questionsLead": "Ihre Antworten helfen nur diesem Entwurf. Sie werden kein akzeptiertes Unternehmenswissen, bevor Prüfung und Herkunft erfolgen.",
+        "aboutSection": "Zum Abschnitt: {{heading}}",
+        "answerPlaceholder": "Ihre Antwort",
+        "answerDisclaimer": "Dies wird nicht automatisch zu verifiziertem Unternehmenswissen.",
+        "blockedNote": "{{count}} Abschnitt(e) bleiben blockiert. „Entwurf erstellen“ lässt diese Abschnitte blockiert."
+      },
+      "draft": {
+        "lead": "Dieser Entwurf nutzt nur akzeptiertes Unternehmenswissen. Fehlende Pflichtinformationen bleiben sichtbar.",
+        "documentLabel": "SOP-Entwurfsdokument",
+        "documentEyebrow": "SOP-Entwurf",
+        "noPlan": "Kein Entwurfsplan verfügbar.",
+        "blockedWarning": "„{{heading}}“ ist blockiert. Akzeptieren Sie zuerst das erforderliche Unternehmenswissen.",
+        "missingWarning": "Für „{{heading}}“ liegt noch kein akzeptiertes Unternehmenswissen vor.",
+        "partialWarning": "Für diesen Abschnitt fehlen noch erforderliche Informationen.",
+        "userNoteLabel": "Ihre Notiz für diesen Entwurf",
+        "userNoteDisclaimer": "Noch kein akzeptiertes Unternehmenswissen — Prüfung und Herkunft sind weiterhin nötig.",
+        "edit": "Bearbeiten",
+        "regenerate": "Neu erstellen",
+        "save": "Entwurf speichern",
+        "saving": "Wird gespeichert…",
+        "saved": "Entwurf gespeichert.",
+        "viewSources": "Quellen anzeigen",
+        "hideSources": "Quellen ausblenden",
+        "sourcesLabel": "Quellen und Begründung",
+        "sourcesTitle": "Quellen & Begründung",
+        "sourcesLead": "Unternehmenswissen, Belege und Vorschriften für diesen Entwurf.",
+        "companyKnowledge": "Verwendetes Unternehmenswissen",
+        "sourceEvidence": "Quell-SOP / Belege",
+        "regulations": "Vorschriften"
+      }
+    },
+    "gaps": {
+      "questions": {
+        "retention": "Wie lange sollen Schulungsunterlagen aufbewahrt werden?",
+        "frequency": "Wie oft sollen Schulungen oder Nachschulungen stattfinden?",
+        "unverifiedEvidence": "Welche akzeptierte Unternehmensregel soll den unverifizierten Dokumenttext hier ersetzen?",
+        "generic": "Welche Unternehmensinformation soll „{{heading}}“ abdecken?"
+      },
+      "needs": {
+        "retention": "Aufbewahrungsfrist für Schulungsunterlagen",
+        "frequency": "Schulungs- oder Nachschulungsintervall",
+        "unverifiedEvidence": "Akzeptierte Unternehmensregel fehlt noch",
+        "generic": "Erforderliche Information für {{heading}}"
       }
     }
   },
@@ -614,6 +741,159 @@
     "haveAccount": "Bereits ein Konto? Anmelden",
     "errors": {
       "unreachable": "Server nicht erreichbar. Läuft das Backend?"
+    }
+  },
+  "ux": {
+    "navLabel": "Hauptnavigation",
+    "details": "Details",
+    "hideDetails": "Details ausblenden",
+    "advanced": "Erweitert",
+    "status": {
+      "toReview": "Zu prüfen",
+      "confirmed": "Bestätigt",
+      "setAside": "Zurückgestellt",
+      "all": "Alle"
+    },
+    "docStatus": {
+      "ready": "Bereit",
+      "working": "Wird bearbeitet",
+      "attention": "Braucht Aufmerksamkeit",
+      "needsText": "Braucht eine lesbare Fassung",
+      "cancelled": "Abgebrochen"
+    },
+    "stagePlain": {
+      "uploading": "Wird hochgeladen",
+      "reading": "Dokument wird gelesen",
+      "organizing": "Abschnitte werden geordnet",
+      "finishing": "Wird abgeschlossen",
+      "ready": "Bereit",
+      "cancelled": "Abgebrochen",
+      "stopping": "Wird angehalten",
+      "attention": "Braucht Aufmerksamkeit",
+      "needsText": "Braucht eine lesbare Fassung"
+    },
+    "documents": {
+      "empty": "Noch keine Dokumente. Laden Sie die SOPs und Vorlagen hoch, die dieses Unternehmen bereits verwendet."
+    },
+    "companySelect": {
+      "label": "Unternehmen"
+    },
+    "readiness": {
+      "label": "Fortschritt des Unternehmens",
+      "title": "Fortschritt",
+      "lead": "Sehen Sie, was erledigt ist und was als Nächstes ansteht.",
+      "leadNamed": "{{name}} — sehen Sie, was erledigt ist und was als Nächstes ansteht.",
+      "percent": "{{value}} % abgeschlossen",
+      "steps": {
+        "setup": "Firmeneinrichtung",
+        "documents": "Dokumente hochgeladen",
+        "review": "Wissen geprüft",
+        "ready": "Bereit für SOPs"
+      },
+      "state": {
+        "done": "Erledigt",
+        "current": "In Arbeit",
+        "upcoming": "Noch nicht",
+        "attention": "Braucht Aufmerksamkeit",
+        "todo": "Als Nächstes"
+      },
+      "summary": {
+        "upload": "Laden Sie die vorhandenen SOPs und Vorlagen des Unternehmens hoch.",
+        "reading": "Die Dokumente sind hochgeladen. Cybrain liest sie noch.",
+        "review": "{{count}} Einträge warten darauf, bestätigt oder zurückgestellt zu werden.",
+        "find": "Lassen Sie das Wissen in den Dokumenten ermitteln und bestätigen Sie, was bleiben soll.",
+        "confirmOne": "Bestätigen Sie mindestens einen Wissenseintrag, bevor Sie ihn in einer SOP verwenden.",
+        "ready": "Dieses Unternehmen hat {{count}} bestätigte Wissenseinträge. Sie können eine SOP erstellen."
+      },
+      "action": {
+        "documents": "Zu den Dokumenten",
+        "review": "Wissen prüfen",
+        "confirm": "Wissen prüfen",
+        "create": "SOP erstellen"
+      }
+    },
+    "knowledge": {
+      "title": "Unternehmenswissen",
+      "description": "Pr\\u00fcfen Sie, was Cybrain aus den Dokumenten dieses Unternehmens gelernt hat, bevor es in neuen SOPs verwendet wird.",
+      "emptyTitle": "Noch kein Unternehmen",
+      "emptyBody": "Legen Sie ein Unternehmen an und laden Sie Dokumente hoch, bevor es Wissen zu pr\\u00fcfen gibt.",
+      "reviewLead": "Beginnen Sie mit den Eintr\\u00e4gen zur Pr\\u00fcfung. Akzeptieren Sie, was stimmt, bearbeiten Sie den Wortlaut oder lehnen Sie ab, was nicht verwendet werden soll.",
+      "reviewLabel": "Pr\\u00fcfung des Unternehmenswissens",
+      "heroTitle": "Cybrain hat diese Inhalte aus Ihren Unternehmensdokumenten gelernt.",
+      "heroBody": "Pr\\u00fcfen Sie sie, bevor Cybrain sie in neuen SOPs verwendet.",
+      "summaryLabel": "Wissens\\u00fcbersicht",
+      "status": {
+        "ready": "Einsatzbereit",
+        "needsReview": "Zur Pr\\u00fcfung",
+        "rejected": "Abgelehnt",
+        "all": "Alle"
+      },
+      "groups": {
+        "people": "Personen & Verantwortlichkeiten",
+        "processes": "Prozesse",
+        "rules": "Regeln & Anforderungen",
+        "terms": "Begriffe & Definitionen",
+        "records": "Aufzeichnungen & Formulare",
+        "format": "Dokumentformat",
+        "regulations": "Vorschriften",
+        "other": "Weiteres Wissen"
+      },
+      "source": "Quelle: {{value}}",
+      "showSource": "Quelle anzeigen",
+      "advancedDetails": "Erweiterte Details",
+      "advanced": {
+        "type": "Typ",
+        "tier": "Ebene",
+        "version": "Version",
+        "acceptedAt": "Akzeptiert am",
+        "rejectedAt": "Abgelehnt am",
+        "origin": "Herkunft",
+        "location": "Stelle"
+      },
+      "actions": {
+        "accept": "Akzeptieren",
+        "edit": "Bearbeiten",
+        "reject": "Ablehnen",
+        "acceptAll": "Alle sichtbaren akzeptieren",
+        "previous": "Zur\\u00fcck",
+        "next": "Weiter"
+      },
+      "progress": "{{reviewed}} von {{total}} gepr\\u00fcft",
+      "focusHint": "Eintrag {{current}} von {{total}}, die noch gepr\\u00fcft werden m\\u00fcssen",
+      "editPrompt": "Wissensaussage bearbeiten",
+      "noItems": "Noch nichts zu pr\\u00fcfen. Laden Sie auf der Unternehmensseite Dokumente hoch und lassen Sie danach das Wissen daraus ermitteln.",
+      "noFilterMatches": "Keine Eintr\\u00e4ge passen zu dieser Ansicht.",
+      "findInDocuments": "Wissen in Dokumenten finden",
+      "finding": "Wissen wird ermittelt\\u2026",
+      "goToDocuments": "Zu den Unternehmensdokumenten",
+      "acceptAllTitle": "Alle sichtbaren Eintr\\u00e4ge akzeptieren?",
+      "acceptAllBody": "{{count}} Eintr\\u00e4ge zur Pr\\u00fcfung akzeptieren? Sie werden in neuen SOPs einsatzbereit. Nichts wird akzeptiert, bis Sie best\\u00e4tigen.",
+      "ctaTitle": "Bereit f\\u00fcr den n\\u00e4chsten Schritt",
+      "ctaBody": "{{count}} Eintr\\u00e4ge sind f\\u00fcr {{company}} einsatzbereit.",
+      "ctaAction": "SOP erstellen",
+      "advancedLead": "Technische Optionen, um weiteres Wissen aus hochgeladenen Dokumenten zu ermitteln."
+    },
+    "sops": {
+      "title": "SOPs",
+      "description": "Starten Sie eine neue SOP für ein Unternehmen. Sie prüfen den Plan, bevor SOP-Text geschrieben wird.",
+      "emptyTitle": "Zuerst ein Unternehmen anlegen",
+      "emptyBody": "Eine SOP gehört zu einem Unternehmen. Legen Sie das Unternehmen an, fügen Sie Dokumente hinzu und prüfen Sie das Wissen. Danach können Sie hier weitermachen.",
+      "panelTitle": "SOP starten",
+      "panelBody": "Sie können starten, auch wenn noch Wissen auf Prüfung wartet. Fehlendes Wissen bleibt im Plan sichtbar und wird nicht automatisch ergänzt.",
+      "startFor": "SOP erstellen für {{name}}"
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "description": "Wählen Sie die Sprache. Technische Optionen bleiben unter Erweitert.",
+      "languageTitle": "Sprache",
+      "languageBody": "Wählen Sie die Sprache für Cybrain.",
+      "advancedLead": "Diese Optionen sind für Einrichtung und Fehlersuche. Die tägliche SOP-Arbeit braucht sie nicht.",
+      "otherAreas": "Weitere Bereiche"
+    },
+    "ckm": {
+      "title": "Bereitschaft für {{company}}",
+      "noDocuments": "Noch keine Dokumente hochgeladen.",
+      "documentsReady": "{{value}} Dokumente sind bereit."
     }
   }
 }

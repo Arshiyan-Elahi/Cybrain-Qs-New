@@ -2,10 +2,38 @@
   "language": {
     "label": "Language"
   },
-  "knowledgeTypes": {"terminology":"Terminology", "document_structure":"Document Structure", "writing_style":"Writing Style", "regulation":"Regulations", "role":"Roles", "responsibility":"Responsibilities", "workflow":"Workflows", "process":"Processes", "business_rule":"Business Rules", "form_or_record":"Records & Forms", "relationship":"Relationships", "best_practice":"Best Practices", "ai_preference":"AI / Quality Preferences"},
-  "knowledgeStatuses": {"proposed":"Proposed", "verified":"Confirmed", "rejected":"Rejected", "superseded":"Superseded"},
-  "knowledgeSourceKinds": {"onboarding":"Onboarding", "uploaded_document":"Uploaded document", "human_created":"Human-created", "ai_extracted":"AI-extracted"},
-  "knowledgeTiers": {"company":"Company", "industry":"Industry", "global":"Global"},
+  "knowledgeTypes": {
+    "terminology": "Terminology",
+    "document_structure": "Document Structure",
+    "writing_style": "Writing Style",
+    "regulation": "Regulations",
+    "role": "Roles",
+    "responsibility": "Responsibilities",
+    "workflow": "Workflows",
+    "process": "Processes",
+    "business_rule": "Business Rules",
+    "form_or_record": "Records & Forms",
+    "relationship": "Relationships",
+    "best_practice": "Best Practices",
+    "ai_preference": "AI / Quality Preferences"
+  },
+  "knowledgeStatuses": {
+    "proposed": "To review",
+    "verified": "Confirmed",
+    "rejected": "Set aside",
+    "superseded": "Replaced"
+  },
+  "knowledgeSourceKinds": {
+    "onboarding": "From company setup",
+    "uploaded_document": "From an uploaded document",
+    "human_created": "Added by a person",
+    "ai_extracted": "Suggested from a document"
+  },
+  "knowledgeTiers": {
+    "company": "Company",
+    "industry": "Industry",
+    "global": "Global"
+  },
   "nav": {
     "companies": "Companies",
     "sopCreate": "Create SOP",
@@ -16,19 +44,21 @@
     "alerts": "Alerts",
     "settings": "Settings",
     "help": "Help",
-    "logout": "Log out"
+    "logout": "Log out",
+    "companyKnowledge": "Company Knowledge",
+    "sops": "SOPs"
   },
   "companyProfiles": {
-    "title": "Company Profiles",
-    "description": "Create and manage Company Profiles, the foundation for your Company Knowledge Model.",
+    "title": "Companies",
+    "description": "Set up a company, add its documents, and see when it is ready for a new SOP.",
     "createCompany": "Create new company",
     "searchPlaceholder": "Search company...",
     "searchLabel": "Search company",
     "empty": "No company found.",
     "createdShort": "Created",
     "info": {
-      "title": "What is a Company Profile?",
-      "body": "A Company Profile is the starting point for building your Company Knowledge Model. It contains all relevant information about your company, your regulations, document standards, terminology and processes. The AI uses this knowledge to understand, improve and create SOPs that fit your company."
+      "title": "How companies work",
+      "body": "Each company keeps its own documents and reviewed knowledge. Cybrain uses only that company's confirmed knowledge when you create an SOP."
     },
     "noSelection": "Select a company to see its profile.",
     "sopCount": "SOPs: {{count}}"
@@ -44,7 +74,7 @@
     "deleteCompany": "Delete company",
     "deleteCompanyTitle": "Delete company?",
     "deleteCompanyLead": "You are permanently deleting:",
-    "deleteCompanyWarning": "This will permanently delete:\n- Company profile and onboarding data\n- All uploaded SOPs/documents\n- All document chunks\n- All pgvector embeddings\n- All proposed/rejected/verified company CKM knowledge\n- CKM evidence/provenance/history owned by this company\n- Company-specific processing state\n- Other company-owned generated data\n\nThis action cannot be undone.",
+    "deleteCompanyWarning": "This permanently removes the company, its documents, and its knowledge. You cannot undo this.",
     "deleteCompanyConfirmLabel": "Type \"{{name}}\" to confirm",
     "deleteCompanyCancel": "Cancel",
     "deleteCompanyPermanently": "Delete company permanently",
@@ -54,7 +84,7 @@
       "unit": "SOP's",
       "documentCount_one": "{{count}} SOP",
       "documentCount_other": "{{count}} SOPs",
-      "knowledgeCounts": "{{proposed}} Proposed · {{confirmed}} Confirmed · {{rejected}} Rejected",
+      "knowledgeCounts": "{{proposed}} to review · {{confirmed}} confirmed · {{rejected}} set aside",
       "filterType": "Filter by type",
       "filterStatus": "Filter by status",
       "filterDocument": "Filter by document",
@@ -71,8 +101,8 @@
       "verifiedAt": "Confirmed: {{value}}",
       "version": "Version {{value}}",
       "viewMode": "Knowledge view",
-      "viewByType": "By Knowledge Type",
-      "viewBySop": "By SOP",
+      "viewByType": "By topic",
+      "viewBySop": "By document",
       "showAll": "Show all ({{count}})",
       "searchTerminology": "Search terminology",
       "noSearchMatches": "No terminology matches this search.",
@@ -95,47 +125,59 @@
         "writing_style": "Writing Style",
         "ai_preferences": "AI / Quality Preferences"
       },
-      "description": "Number of uploaded SOPs analysed for this Company Knowledge Model.",
+      "description": "Upload the SOPs and templates this company already uses.",
       "showDocuments": "Show documents",
       "uploadDocument": "Upload document",
       "uploadDocuments": "Upload documents",
       "uploading": "Uploading…",
       "uploadStatus": "Upload status",
-      "documents": "Uploaded documents",
-      "knowledgeObjects": "Available knowledge objects",
-      "noKnowledgeObjects": "No Knowledge Objects have been extracted for this company.",
-      "extractKnowledge": "Extract knowledge",
+      "documents": "Documents",
+      "knowledgeObjects": "Company knowledge",
+      "noKnowledgeObjects": "Nothing to review yet. Upload documents on the company page, then find knowledge in those documents.",
+      "extractKnowledge": "Find knowledge in documents",
       "extracting": "Extracting…",
       "cancelling": "Cancelling…",
       "cancel": "Cancel",
       "confirmKnowledge": "Confirm",
       "editKnowledge": "Edit",
-      "rejectKnowledge": "Reject",
+      "rejectKnowledge": "Set aside",
       "editPrompt": "Edit the Knowledge Object label",
       "knowledgeStatus": "Status: {{value}}",
       "provenance": "Source",
       "preview": "Preview",
-      "previewSuccess": "Document extracted successfully ✓",
+      "previewSuccess": "Document read successfully",
       "close": "Close",
       "sections": "sections",
       "embeddings": "embeddings",
       "documentStructure": "Document structure",
       "extractedContent": "Extracted content",
       "administrativeContent": "Administrative / approval content",
-      "stage": {"uploading":"Uploading", "extracting":"Extracting document", "structuring":"Structuring and chunking", "embedding":"Creating embeddings", "finalizing":"Finalizing", "completed":"Completed", "cancelled":"Cancelled", "cancelling":"Cancelling", "failed":"Failed", "processed":"Completed", "needs_ocr":"Needs OCR"},
+      "stage": {
+        "uploading": "Uploading",
+        "extracting": "Extracting document",
+        "structuring": "Structuring and chunking",
+        "embedding": "Creating embeddings",
+        "finalizing": "Finalizing",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "cancelling": "Cancelling",
+        "failed": "Failed",
+        "processed": "Completed",
+        "needs_ocr": "Needs OCR"
+      },
       "noChunks": "No structured sections are available.",
-      "tier": "Tier: {{value}}",
+      "tier": "Applies to: {{value}}",
       "embeddingCount": "{{embedded}}/{{chunks}} embedded",
       "retryEmbeddings": "Retry embeddings",
       "retryingEmbeddings": "Embedding…",
       "delete": "Delete",
       "deleting": "Deleting…",
-      "deleteTitle": "Delete SOP?",
-      "deleteWarning": "This permanently removes:\n- document record\n- extracted/normalized document data\n- chunks\n- pgvector embeddings\n- document-derived proposed CKM knowledge\n- processing/cancellation state\n\nThis action cannot be undone.",
+      "deleteTitle": "Delete this document?",
+      "deleteWarning": "This permanently removes the document and the unconfirmed knowledge that came only from it. You cannot undo this.",
       "deletePermanently": "Delete permanently",
       "deleteSuccess": "{{filename}} was deleted.",
       "deleteBlockedTitle": "Cannot permanently delete this SOP yet.",
-      "deleteBlockedMessage": "Verified company knowledge still depends on this document. Review those dependencies before deleting.",
+      "deleteBlockedMessage": "Some confirmed company knowledge still comes from this document. Review those items before deleting.",
       "deleteBlockedCount_one": "{{count}} verified Knowledge Object depends on it.",
       "deleteBlockedCount_other": "{{count}} verified Knowledge Objects depend on it.",
       "reviewDependencies": "Review dependencies",
@@ -143,19 +185,20 @@
         "uploaded": "Uploaded",
         "uploading": "Uploading…",
         "processing": "Processing",
-        "embedding": "Creating embeddings…",
+        "embedding": "Embedding",
         "cancelling": "Cancelling…",
         "cancelled": "Cancelled",
         "processed": "Processed",
         "completed": "Completed",
-        "embedding": "Embedding",
         "failed": "Failed",
         "needs_ocr": "Needs OCR"
       },
       "uploaded": "{{filename}} processed into {{chunks}} sections.",
       "uploadRejected": "Upload rejected. {{reason}}",
-      "needsOcr": "No text layer found. This document needs OCR."
-    }
+      "needsOcr": "No text layer found. This document needs OCR.",
+      "deleteWarningAdvanced": "This permanently removes:\n- document record\n- extracted/normalized document data\n- chunks\n- pgvector embeddings\n- document-derived proposed CKM knowledge\n- processing/cancellation state\n\nThis action cannot be undone."
+    },
+    "deleteCompanyWarningAdvanced": "This will permanently delete:\n- Company profile and onboarding data\n- All uploaded SOPs/documents\n- All document chunks\n- All pgvector embeddings\n- All proposed/rejected/verified company CKM knowledge\n- CKM evidence/provenance/history owned by this company\n- Company-specific processing state\n- Other company-owned generated data\n\nThis action cannot be undone."
   },
   "companyData": {
     "industry": {
@@ -192,36 +235,36 @@
     "wizard": {
       "back": "Back",
       "stepperLabel": "SOP assistant steps",
-      "searchSimilar": "Search Similar Content",
+      "searchSimilar": "Find similar SOPs",
       "searchUnavailable": "Similarity search is not available because the backend API is not implemented.",
       "continueTo": "Continue to {{step}}",
       "finish": "Finish",
       "notDesigned": "No design is available for this step yet. It will be added as soon as the layout is available."
     },
     "blueprint": {
-      "title": "SOP Blueprint",
-      "subtitle": "Review the planned sections, verified knowledge, source evidence and gaps before any SOP prose is generated.",
-      "rebuild": "Rebuild blueprint",
+      "title": "SOP plan",
+      "subtitle": "Review the sections, confirmed knowledge, and anything still missing. No SOP text is written on this step.",
+      "rebuild": "Refresh plan",
       "building": "Building blueprint…",
-      "needTitleAndCompany": "Enter an SOP title and select a company before building the blueprint.",
-      "structureSource": "Structure source",
+      "needTitleAndCompany": "Enter an SOP title and select a company before continuing.",
+      "structureSource": "Outline based on",
       "structure": {
-        "verified_document_structure": "Verified company document structure",
-        "uploaded_sop_structure": "Uploaded SOP outline (not verified CKM)",
-        "generic_fallback": "Generic fallback structure"
+        "verified_document_structure": "Your confirmed document outline",
+        "uploaded_sop_structure": "An uploaded SOP outline that is not confirmed yet",
+        "generic_fallback": "A standard outline, because no company outline is confirmed yet"
       },
-      "summary": "{{grounded}} grounded · {{partial}} partial · {{blocked}} blocked · {{gaps}} gaps · {{verified}} verified knowledge objects mapped",
-      "mappedKnowledge": "Verified knowledge",
-      "noVerifiedKnowledge": "No verified Knowledge Objects mapped to this section.",
-      "sourceEvidence": "Supporting source chunks",
-      "noChunks": "No supporting source chunks mapped.",
+      "summary": "{{grounded}} sections ready · {{partial}} need more detail · {{blocked}} blocked · {{gaps}} gaps · {{verified}} confirmed items used",
+      "mappedKnowledge": "Confirmed knowledge",
+      "noVerifiedKnowledge": "No confirmed knowledge for this section yet.",
+      "sourceEvidence": "Supporting passages",
+      "noChunks": "No supporting passages for this section.",
       "regulations": "Regulatory references",
-      "gaps": "Missing knowledge",
+      "gaps": "Still missing",
       "noGaps": "No gaps recorded for this section.",
-      "guidance": "Generation-level guidance (not SOP facts)",
+      "guidance": "Notes for later drafting",
       "status": {
-        "grounded": "Grounded",
-        "partial": "Partial",
+        "grounded": "Ready",
+        "partial": "Needs detail",
         "blocked": "Blocked"
       },
       "severity": {
@@ -230,12 +273,16 @@
       }
     },
     "steps": {
-      "project-initialization": "Project initialization",
-      "knowledge-selection": "Knowledge selection",
-      "blueprint-builder": "Blueprint builder",
-      "knowledge-mapping": "Knowledge mapping",
-      "draft-generation": "Draft generation",
-      "review-iteration": "Review & iteration"
+      "what-to-create": "What to create",
+      "preparing": "Preparing",
+      "check-before": "Check before creating",
+      "sop-draft": "SOP draft",
+      "project-initialization": "What to create",
+      "knowledge-selection": "Preparing",
+      "blueprint-builder": "Check before creating",
+      "knowledge-mapping": "Check before creating",
+      "draft-generation": "SOP draft",
+      "review-iteration": "SOP draft"
     },
     "step01": {
       "subtitle": "Start your new SOP project by providing basic information.",
@@ -289,6 +336,86 @@
       "relative": {
         "today": "Today",
         "yesterday": "Yesterday"
+      }
+    },
+    "guided": {
+      "continue": "Continue",
+      "createDraft": "Create Draft",
+      "retryPrepare": "Try again",
+      "done": "Done",
+      "step1": {
+        "subtitle": "Tell Cybrain what SOP you want to create.",
+        "titleLabel": "SOP Title",
+        "titleHint": "Use a clear name reviewers will recognise.",
+        "titlePlaceholder": "Training and Retraining of GxP Personnel",
+        "instructionsLabel": "Optional instructions",
+        "instructionsHint": "Add anything Cybrain should know for this SOP.",
+        "instructionsPlaceholder": "Add anything Cybrain should know"
+      },
+      "step2": {
+        "lead": "Cybrain is preparing your SOP from this company’s accepted knowledge and documents.",
+        "working": "Cybrain is preparing the SOP…",
+        "done": "Preparation complete",
+        "doneBody": "Continue to check what is ready and what still needs information.",
+        "task": {
+          "knowledge": "Using accepted company knowledge",
+          "outline": "Preparing the SOP outline",
+          "evidence": "Connecting supporting evidence",
+          "gaps": "Finding missing required information"
+        }
+      },
+      "step3": {
+        "hero": "Cybrain is ready to create your SOP",
+        "lead": "Review what is ready. Answer any required questions in plain language. Blocked sections stay blocked until the missing company knowledge is accepted.",
+        "noPlan": "No preparation result is available yet. Go back and continue from the previous step.",
+        "readyHeading": "Ready",
+        "needsHeading": "Needs information",
+        "noneReady": "No sections are fully ready yet.",
+        "noneNeeds": "Nothing required is missing.",
+        "questionsHeading": "Required information",
+        "questionsLead": "Your answers help this draft only. They are not accepted company knowledge until reviewed with provenance.",
+        "aboutSection": "About section: {{heading}}",
+        "answerPlaceholder": "Your answer",
+        "answerDisclaimer": "This does not automatically become verified company knowledge.",
+        "blockedNote": "{{count}} section(s) remain blocked. Create Draft will keep those sections blocked."
+      },
+      "draft": {
+        "lead": "This draft uses only accepted company knowledge. Missing required information stays visible.",
+        "documentLabel": "SOP draft document",
+        "documentEyebrow": "Draft SOP",
+        "noPlan": "No draft plan is available.",
+        "blockedWarning": "“{{heading}}” is blocked. Accept the required company knowledge before this section can be drafted.",
+        "missingWarning": "No accepted company knowledge is available for “{{heading}}” yet.",
+        "partialWarning": "Some required information is still missing for this section.",
+        "userNoteLabel": "Your note for this draft",
+        "userNoteDisclaimer": "Not yet accepted company knowledge — review and provenance still required.",
+        "edit": "Edit",
+        "regenerate": "Regenerate",
+        "save": "Save Draft",
+        "saving": "Saving…",
+        "saved": "Draft saved.",
+        "viewSources": "View sources",
+        "hideSources": "Hide sources",
+        "sourcesLabel": "Sources and reasoning",
+        "sourcesTitle": "Sources & reasoning",
+        "sourcesLead": "Company knowledge, supporting evidence, and regulations used for this draft.",
+        "companyKnowledge": "Company knowledge used",
+        "sourceEvidence": "Source SOP / evidence",
+        "regulations": "Regulations"
+      }
+    },
+    "gaps": {
+      "questions": {
+        "retention": "How long should training records be retained?",
+        "frequency": "How often should training or retraining happen?",
+        "unverifiedEvidence": "Which accepted company rule should replace unverified document text here?",
+        "generic": "What company information should cover “{{heading}}”?"
+      },
+      "needs": {
+        "retention": "Training record retention period",
+        "frequency": "Training or retraining frequency",
+        "unverifiedEvidence": "Accepted company rule still missing",
+        "generic": "Required information for {{heading}}"
       }
     }
   },
@@ -614,6 +741,159 @@
     "haveAccount": "Already have an account? Sign in",
     "errors": {
       "unreachable": "Cannot reach the server. Is the backend running?"
+    }
+  },
+  "ux": {
+    "navLabel": "Main",
+    "details": "Details",
+    "hideDetails": "Hide details",
+    "advanced": "Advanced",
+    "status": {
+      "toReview": "To review",
+      "confirmed": "Confirmed",
+      "setAside": "Set aside",
+      "all": "All"
+    },
+    "docStatus": {
+      "ready": "Ready",
+      "working": "Working on it",
+      "attention": "Needs attention",
+      "needsText": "Needs a readable copy",
+      "cancelled": "Cancelled"
+    },
+    "stagePlain": {
+      "uploading": "Uploading",
+      "reading": "Reading the document",
+      "organizing": "Organizing sections",
+      "finishing": "Finishing",
+      "ready": "Ready",
+      "cancelled": "Cancelled",
+      "stopping": "Stopping",
+      "attention": "Needs attention",
+      "needsText": "Needs a readable copy"
+    },
+    "documents": {
+      "empty": "No documents yet. Upload the SOPs and templates this company already uses."
+    },
+    "companySelect": {
+      "label": "Company"
+    },
+    "readiness": {
+      "label": "Company progress",
+      "title": "Progress",
+      "lead": "See what is done and what to do next.",
+      "leadNamed": "{{name}} — see what is done and what to do next.",
+      "percent": "{{value}}% complete",
+      "steps": {
+        "setup": "Company setup",
+        "documents": "Documents uploaded",
+        "review": "Knowledge reviewed",
+        "ready": "Ready to create SOPs"
+      },
+      "state": {
+        "done": "Done",
+        "current": "In progress",
+        "upcoming": "Not yet",
+        "attention": "Needs attention",
+        "todo": "To do"
+      },
+      "summary": {
+        "upload": "Upload the company's existing SOPs and templates.",
+        "reading": "Documents are uploaded. Cybrain is still reading them.",
+        "review": "{{count}} items are waiting for you to confirm or set aside.",
+        "find": "Find knowledge in the uploaded documents, then confirm what should be kept.",
+        "confirmOne": "Confirm at least one knowledge item before you rely on it in an SOP.",
+        "ready": "This company has {{count}} confirmed knowledge items. You can create an SOP."
+      },
+      "action": {
+        "documents": "Go to documents",
+        "review": "Review knowledge",
+        "confirm": "Review knowledge",
+        "create": "Create SOP"
+      }
+    },
+    "knowledge": {
+      "title": "Company Knowledge",
+      "description": "Review what Cybrain learned from this company's documents before it is used in new SOPs.",
+      "emptyTitle": "No company yet",
+      "emptyBody": "Create a company and upload its documents before there is knowledge to review.",
+      "reviewLead": "Start with items that need review. Accept what is correct, edit the wording, or reject what should not be used.",
+      "reviewLabel": "Company knowledge review",
+      "heroTitle": "Cybrain learned these things from your company documents.",
+      "heroBody": "Review them before Cybrain uses them in new SOPs.",
+      "summaryLabel": "Knowledge summary",
+      "status": {
+        "ready": "Ready to use",
+        "needsReview": "Needs review",
+        "rejected": "Rejected",
+        "all": "All"
+      },
+      "groups": {
+        "people": "People & Responsibilities",
+        "processes": "Processes",
+        "rules": "Rules & Requirements",
+        "terms": "Terms & Definitions",
+        "records": "Records & Forms",
+        "format": "Document Format",
+        "regulations": "Regulations",
+        "other": "Other Knowledge"
+      },
+      "source": "Source: {{value}}",
+      "showSource": "Show source",
+      "advancedDetails": "Advanced details",
+      "advanced": {
+        "type": "Type",
+        "tier": "Tier",
+        "version": "Version",
+        "acceptedAt": "Accepted at",
+        "rejectedAt": "Rejected at",
+        "origin": "Origin",
+        "location": "Location"
+      },
+      "actions": {
+        "accept": "Accept",
+        "edit": "Edit",
+        "reject": "Reject",
+        "acceptAll": "Accept all visible",
+        "previous": "Previous",
+        "next": "Next"
+      },
+      "progress": "{{reviewed}} of {{total}} reviewed",
+      "focusHint": "Reviewing item {{current}} of {{total}} that still need review",
+      "editPrompt": "Edit the knowledge statement",
+      "noItems": "Nothing to review yet. Upload documents on the company page, then find knowledge in those documents.",
+      "noFilterMatches": "No items match this view.",
+      "findInDocuments": "Find knowledge in documents",
+      "finding": "Finding knowledge…",
+      "goToDocuments": "Go to company documents",
+      "acceptAllTitle": "Accept all visible items?",
+      "acceptAllBody": "Accept {{count}} items that need review? They will become ready to use in new SOPs. Nothing is accepted until you confirm.",
+      "ctaTitle": "Ready for the next step",
+      "ctaBody": "{{count}} items are ready to use for {{company}}.",
+      "ctaAction": "Create an SOP",
+      "advancedLead": "Technical options for finding more knowledge from uploaded documents."
+    },
+    "sops": {
+      "title": "SOPs",
+      "description": "Start a new SOP for a company. You review the plan before any SOP text is written.",
+      "emptyTitle": "Add a company first",
+      "emptyBody": "An SOP belongs to one company. Create the company, add its documents, and review its knowledge. Then come back here.",
+      "panelTitle": "Start an SOP",
+      "panelBody": "You can start even if some knowledge is still waiting for review. Missing knowledge stays visible in the plan instead of being filled in automatically.",
+      "startFor": "Create SOP for {{name}}"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Choose your language. Technical options stay under Advanced.",
+      "languageTitle": "Language",
+      "languageBody": "Choose the language used across Cybrain.",
+      "advancedLead": "These options are for setup and troubleshooting. Everyday SOP work does not need them.",
+      "otherAreas": "Other areas"
+    },
+    "ckm": {
+      "title": "Readiness for {{company}}",
+      "noDocuments": "No documents uploaded yet.",
+      "documentsReady": "{{value}} documents are ready to use."
     }
   }
 }

@@ -21,15 +21,21 @@ export const ROUTES = {
   help: '/help',
 } as const;
 
-/** The wide sidebar on the company profiles screen shows a single entry. */
+/**
+ * Everyday navigation. Longer product areas stay reachable from Settings.
+ * `end` keeps SOPs from staying active while Create SOP is open.
+ */
 export const SIDEBAR_NAV: NavItem[] = [
-  { id: 'companies', labelKey: 'nav.companies', icon: 'buildingSolid', to: ROUTES.companies },
+  { id: 'companies', labelKey: 'nav.companies', icon: 'building', to: ROUTES.companies, end: true },
+  { id: 'knowledge', labelKey: 'nav.companyKnowledge', icon: 'book', to: ROUTES.knowledge, end: true },
+  { id: 'sop-create', labelKey: 'nav.sopCreate', icon: 'fileCog', to: ROUTES.sopCreate, end: true },
+  { id: 'sops', labelKey: 'nav.sops', icon: 'fileText', to: ROUTES.sopLibrary, end: true },
+  { id: 'settings', labelKey: 'nav.settings', icon: 'settings', to: ROUTES.settings, end: true },
 ];
 
 /**
- * The collapsed icon rail on the SOP wizard screen. The design shows seven
- * glyphs; only the first two have a labelled destination in the PDFs, the rest
- * are reserved sections and route to placeholders for now.
+ * Previous icon-rail destinations. Kept so those routes remain reachable
+ * from Settings rather than the primary navigation.
  */
 export const RAIL_NAV: NavItem[] = [
   { id: 'companies', labelKey: 'nav.companies', icon: 'building', to: ROUTES.companies },
@@ -41,9 +47,17 @@ export const RAIL_NAV: NavItem[] = [
   { id: 'alerts', labelKey: 'nav.alerts', icon: 'siren', to: ROUTES.alerts },
 ];
 
-/** Shared bottom-of-sidebar actions. */
+/** Areas that are not part of the everyday path. Linked from Settings. */
+export const ADVANCED_NAV: NavItem[] = [
+  { id: 'workflows', labelKey: 'nav.workflows', icon: 'workflow', to: ROUTES.workflows },
+  { id: 'assistant', labelKey: 'nav.assistant', icon: 'sparkles', to: ROUTES.assistant },
+  { id: 'records', labelKey: 'nav.records', icon: 'clipboardPlus', to: ROUTES.records },
+  { id: 'alerts', labelKey: 'nav.alerts', icon: 'siren', to: ROUTES.alerts },
+  { id: 'help', labelKey: 'nav.help', icon: 'lifeBuoy', to: ROUTES.help },
+];
+
+/** Shared bottom-of-sidebar actions. Settings lives in the primary nav. */
 export const SIDEBAR_FOOTER_NAV: NavItem[] = [
-  { id: 'settings', labelKey: 'nav.settings', icon: 'settings', to: ROUTES.settings },
   { id: 'help', labelKey: 'nav.help', icon: 'lifeBuoy', to: ROUTES.help },
   { id: 'logout', labelKey: 'nav.logout', icon: 'logOut', to: ROUTES.login },
 ];

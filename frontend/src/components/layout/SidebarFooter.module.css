@@ -29,3 +29,12 @@
   width: 40px;
   height: 32px;
 }
+
+@media (max-width: 900px) {
+  .footer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 8px;
+  }
+}
